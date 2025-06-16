@@ -1,0 +1,31 @@
+@model IEnumerable<EmailCampaignApp.Models.ScheduledEmail>
+
+@{
+    ViewData["Title"] = "Scheduled Emails";
+}
+
+<h1>Scheduled Emails</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Campaign Name</th>
+            <th>Scheduled Date</th>
+            <th>Total Emails Scheduled</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var group in Model.GroupBy(e => new { e.CampaignName, ScheduledDate = e.LocalScheduledDate.ToString("g") }))
+        {
+            <tr>
+                <td>@group.Key.CampaignName</td>
+                <td>
+                    <a href="@Url.Action("ScheduledEmailsByDate", "Email", new { date = group.Key.ScheduledDate })">
+                        @group.Key.ScheduledDate
+                    </a>
+                </td>
+                <td>@group.Count()</td>
+            </tr>
+        }
+    </tbody>
+</table>

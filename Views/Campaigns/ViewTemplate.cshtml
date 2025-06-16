@@ -1,0 +1,81 @@
+@model Campaign
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Campaign Template</title>
+    <style>
+        /* Add custom styles for your view */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .campaign-template {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+            .campaign-template img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 8px;
+            }
+
+        h1, h2, p {
+            margin-bottom: 15px;
+        }
+
+        .campaign-template .description {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .campaign-template .template-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="campaign-template">
+        <div class="template-content">
+            <h2>Template Content</h2>
+            <div class="template-container">
+                @Html.Raw(Model.TemplateContent)  <!-- This renders the HTML content of the template -->
+            </div>
+            <button id="editTemplateBtn" class="btn btn-primary">Edit Template</button>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById('editTemplateBtn').addEventListener('click', function() {
+        let templateContainer = document.querySelector('.template-container').cloneNode(true);
+
+        // Remove the edit button before saving in session storage
+        let editButton = templateContainer.querySelector('#editTemplateBtn');
+        if (editButton) {
+            editButton.remove();
+        }
+
+        let templateHtml = templateContainer.innerHTML.trim();
+        let templateId = "@Model.Id"; // Pass template ID to the update page
+
+        // Store template in session storage
+        sessionStorage.setItem('emailTemplate', templateHtml);
+        sessionStorage.setItem('templateId', templateId);
+
+        // Redirect to Update Template page
+        window.location.href = `/Email/UpdateTemplate?id=${templateId}`;
+    });
+</script>
+</html>

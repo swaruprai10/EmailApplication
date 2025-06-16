@@ -1,0 +1,476 @@
+﻿@* @using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+    <title>@ViewData["Title"] - EmailCampaignApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/EmailCampaignApp.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand d-flex align-items-center py-2 me-auto" asp-area="" asp-controller="Email" asp-action="Dashboard">
+                    <img src="@Url.Content("~/image/main_front_logo.png")" alt="Logo" class="navbar-logo" style="height: 32px">
+                </a>
+
+                @if(User.Identity?.IsAuthenticated == true)
+                {
+                    <button class="navbar-toggler navbar-toggler-custom position-relative" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" style="width: 44px ; height: 44px;">
+                        <span class="navbar-toggler-icon position-absolute top-50 start-50 translate-middle"></span>
+                    </button>
+                }
+                else
+                {
+                    <!-- Show login button outside collapse for mobile -->
+                    <div class="d-lg-none ms-auto">
+                        <a class="btn btn-primary text-white px-3 d-flex align-items-center" style="height: 38px;" asp-controller="Account" asp-action="Login">Login</a>
+                    </div>
+                }
+
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <!-- User dropdown -->
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    @User.FindFirst(ClaimTypes.Email)?.Value
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end">
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-link p-0">
+                                            <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                                <polyline points="16 17 21 12 16 7"></polyline>
+                                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                                            </svg>
+                                            Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                        }
+                        else
+                        {
+                            <!-- Desktop login button -->
+                            <li class="nav-item d-none d-lg-block">
+                                <a class="btn btn-primary text-white px-3 d-flex align-items-center" style="height: 38px; " asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row flex-nowrap">
+
+            @if(User.Identity?.IsAuthenticated == true)
+            {
+                <!-- Sidebar Offcanvas for mobile -->
+                <div class="col-auto px-0">
+                    <div class="offcanvas-lg offcanvas-start sidebar-offcanvas" tabindex="-1" id="sidebar">
+                        <div class="offcanvas-header d-lg-none">
+                            @* <h5 class="offcanvas-title">Menu</h5> *@
+                          @*   <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body p-0">
+                            <nav class="sidebar d-lg-block">
+                                <div class="sidebar-nav">
+                                    <a class="sidebar-link active" asp-area=""
+                                       asp-controller="@(User.IsInRole("Admin") || User.IsInRole("Editor") ? "Admin" : "Email")"
+                                       asp-action="Dashboard">
+                                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                        </svg>
+                                        Dashboard
+                                    </a>
+                                    @if (User.IsInRole("User") || User.IsInRole("Author"))
+                                    {
+                                        <a class="sidebar-link" asp-area="" asp-controller="Contacts" asp-action="Create">
+                                            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="12" cy="7" r="4"></circle>
+                                            </svg>
+                                            Contacts
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                                    {
+                                        <a class="sidebar-link" asp-area="" asp-controller="Contacts" asp-action="Index">
+                                            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="12" cy="7" r="4"></circle>
+                                            </svg>
+                                            Contacts
+                                        </a>
+                                        <a class="sidebar-link" asp-area="" asp-controller="Email" asp-action="Campaigns">
+                                            <svg class="sidebar-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path>
+                                                <path d="M12 16l4-4H8z"></path>
+                                            </svg>
+                                            Campaign
+                                        </a>
+                                        <a class="sidebar-link" asp-area="" asp-controller="Email" asp-action="SendEmail">
+                                            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M22 2L11 13"></path>
+                                                <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+                                            </svg>
+                                            Send Email
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a class="sidebar-link" asp-area="" asp-controller="Account" asp-action="Register">
+                                            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="8.5" cy="7" r="4"></circle>
+                                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                                            </svg>
+                                            Register
+                                        </a>
+                                    }
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Main Content -->
+           @*  <main class="col ps-lg-2 pt-3 main-content"> *@
+           @*  <main class="@(User.Identity?.IsAuthenticated == true ? "col ps-lg-2 pt-3 main-content" : "col-12 pt-3")">
+                <div class="container-fluid px-lg-4 px-md-3 px-2">
+                    <main role="main" class="pb-3">
+                        @RenderBody()
+                    </main>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        if(document.getElementById('body')){
+            CKEDITOR.replace('body' , { versionCheck:false });
+        }
+    </script>
+</body>
+</html> *@
+
+
+@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+    <title>@ViewData["Title"] - EmailCampaignApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/EmailCampaignApp.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container-fluid">
+                @{
+                    var logoController = User.Identity?.IsAuthenticated == true ? "Email" : "Home"; // Update "Home" if your landing page uses another controller
+                    var logoAction = User.Identity?.IsAuthenticated == true ? "Dashboard" : "Index"; // Update "Index" if landing page action differs
+                }
+                <a class="navbar-brand d-flex align-items-center py-2 me-auto"
+                   asp-area=""
+                   asp-controller="@logoController"
+                   asp-action="@logoAction">
+                    <img src="@Url.Content("~/image/main_front_logo.png")" alt="EmailCampaign Logo" class="navbar-logo">
+                </a>
+              
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <button class="navbar-toggler navbar-toggler-custom d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                }
+                else
+                {
+                    <!-- Mobile login button -->
+                    <div class="d-lg-none">
+                        <a class="btn btn-primary" asp-controller="Account" asp-action="Login">
+                            <svg class="icon me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                <polyline points="10 17 15 12 10 7"></polyline>
+                                <line x1="15" y1="12" x2="3" y2="12"></line>
+                            </svg>
+                            <span class="d-none d-sm-inline">Login</span>
+                        </a>
+                    </div>
+                }
+
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <svg class="icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    <span class="d-none d-md-inline">@User.FindFirst(ClaimTypes.Email)?.Value</span>
+                                    <span class="d-md-none">Account</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="px-3 py-2 border-bottom">
+                                        <div class="fw-semibold text-dark">@User.FindFirst(ClaimTypes.Email)?.Value</div>
+                                        <small class="text-muted">
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <span class="badge bg-danger">Admin</span>
+                                            }
+                                            @if (User.IsInRole("Editor"))
+                                            {
+                                                <span class="badge bg-warning">Editor</span>
+                                            }
+                                            @if (User.IsInRole("User"))
+                                            {
+                                                <span class="badge bg-info">User</span>
+                                            }
+                                            @if (User.IsInRole("Author"))
+                                            {
+                                                <span class="badge bg-success">Author</span>
+                                            }
+                                        </small>
+                                    </li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="dropdown-item p-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-link dropdown-item">
+                                                <svg class="icon me-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                                </svg>
+                                                Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item d-none d-lg-block">
+                                <a class="btn btn-primary" asp-controller="Account" asp-action="Login">
+                                    <svg class="icon me-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                        <polyline points="10 17 15 12 10 7"></polyline>
+                                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                                    </svg>
+                                    Login
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <!-- Enhanced Sidebar -->
+                <div class="col-auto d-none d-lg-block">
+                    <nav class="sidebar">
+                        <div class="sidebar-nav">
+                            <a class="sidebar-link active" asp-area=""
+                               asp-controller="@(User.IsInRole("Admin") || User.IsInRole("Editor") ? "Admin" : "Email")"
+                               asp-action="Dashboard">
+                                <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                Dashboard
+                            </a>
+
+                            @if (User.IsInRole("User") || User.IsInRole("Author"))
+                            {
+                                <a class="sidebar-link" asp-area="" asp-controller="Contacts" asp-action="Create">
+                                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="8.5" cy="7" r="4"></circle>
+                                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                                    </svg>
+                                    Add Contacts
+                                </a>
+                            }
+
+                            @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                            {
+                                <a class="sidebar-link" asp-area="" asp-controller="Contacts" asp-action="Index">
+                                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    All Contacts
+                                </a>
+                                <a class="sidebar-link" asp-area="" asp-controller="Email" asp-action="Campaigns">
+                                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+                                    </svg>
+                                    Campaigns
+                                </a>
+                                <a class="sidebar-link" asp-area="" asp-controller="Email" asp-action="SendEmail">
+                                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 2L11 13"></path>
+                                        <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+                                    </svg>
+                                    Send Email
+                                </a>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a class="sidebar-link" asp-area="" asp-controller="Account" asp-action="Register">
+                                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="8.5" cy="7" r="4"></circle>
+                                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                                    </svg>
+                                    Register User
+                                </a>
+                            }
+                        </div>
+                    </nav>
+                </div>
+
+                <!-- Mobile Sidebar Offcanvas -->
+                <div class="offcanvas offcanvas-start sidebar-offcanvas d-lg-none" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title fw-bold text-danger" id="sidebarLabel">
+                            <svg class="me-2" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22 6 12 13 2 6" stroke="white" stroke-width="2" fill="none"></polyline>
+                            </svg>
+                            Menu
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body p-0">
+                      @*   <nav class="sidebar"> *@
+                            <div class="sidebar-nav">
+                                <a class="sidebar-link active mobile-nav-link" asp-area=""
+                                   asp-controller="@(User.IsInRole("Admin") || User.IsInRole("Editor") ? "Admin" : "Email")"
+                                   asp-action="Dashboard">
+                                    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                    </svg>
+                                    Dashboard
+                                </a>
+
+                                @if (User.IsInRole("User") || User.IsInRole("Author"))
+                                {
+                                    <a class="sidebar-link mobile-nav-link" asp-area="" asp-controller="Contacts" asp-action="Create">
+                                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="8.5" cy="7" r="4"></circle>
+                                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                                        </svg>
+                                        Add Contacts
+                                    </a>
+                                }
+
+                                @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                                {
+                                    <a class="sidebar-link mobile-nav-link" asp-area="" asp-controller="Contacts" asp-action="Index">
+                                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                        All Contacts
+                                    </a>
+                                    <a class="sidebar-link mobile-nav-link" asp-area="" asp-controller="Email" asp-action="Campaigns">
+                                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                            <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+                                        </svg>
+                                        Campaigns
+                                    </a>
+                                    <a class="sidebar-link mobile-nav-link" asp-area="" asp-controller="Email" asp-action="SendEmail">
+                                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M22 2L11 13"></path>
+                                            <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+                                        </svg>
+                                        Send Email
+                                    </a>
+                                }
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a class="sidebar-link mobile-nav-link" asp-area="" asp-controller="Account" asp-action="Register">
+                                        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="8.5" cy="7" r="4"></circle>
+                                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                                        </svg>
+                                        Register User
+                                    </a>
+                                }
+                            </div>
+                        @* </nav> *@
+                    </div>
+                </div>
+            }
+
+            <!-- Enhanced Main Content -->
+            <main class="@(User.Identity?.IsAuthenticated == true ? "col main-content" : "col-12 pt-3 full-width-content")">
+                <div class="container-fluid px-lg-4 px-md-3 px-2 py-3">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/layout.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

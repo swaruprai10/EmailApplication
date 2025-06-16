@@ -1,0 +1,41 @@
+@model EmailCampaignApp.Models.ManageRolesViewModel
+
+@{
+    ViewData["Title"] = "Manage Roles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Manage Roles for @Model.UserName</h2>
+
+<form asp-action="ManageRoles" method="post">
+    <input type="hidden" asp-for="UserId" />
+
+    <div class="form-group">
+        <label>Current Roles</label>
+        <ul>
+            @foreach (var role in Model.UserRoles)
+            {
+                <li>@role</li>
+            }
+        </ul>
+    </div>
+
+    <div class="form-group">
+        <label>Assign Roles</label>
+        @foreach (var role in Model.AllRoles)
+        {
+            <div>
+                <input type="checkbox" name="SelectedRoles" value="@role" />
+                <label>@role</label>
+            </div>
+        }
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Dashboard">Back to Dashboard</a>
+</div>

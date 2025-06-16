@@ -1,0 +1,462 @@
+﻿/*body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #ff7e7e, #ff3d3d);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-title {
+    font-size: 28px;
+    margin: 10px 0;
+    color: #333;
+}
+
+.auth-subtitle {
+    font-size: 16px;
+    color: #666;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.input-icon {
+    margin-right: 8px;
+    color: #ff3d3d;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s;
+}
+
+    .form-control:focus {
+        border-color: #ff3d3d;
+        outline: none;
+        box-shadow: 0 0 5px rgba(255, 61, 61, 0.5);
+    }
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #ff3d3d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+    .btn:hover {
+        background-color: #e63939;
+    }
+
+.validation-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+    .remember-me input {
+        margin-right: 5px;
+    }
+
+@media (max-width: 600px) {
+    .auth-container {
+        padding: 20px;
+    }
+
+    .auth-title {
+        font-size: 24px;
+    }
+
+    .auth-subtitle {
+        font-size: 14px;
+    }
+}
+*/
+
+/* Hide navbars, footers, sidebars, etc. */
+/*.navbar,
+.sidebar,
+.footer {
+    display: none !important;
+}*/
+
+/* Optional: center the auth form */
+/*.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f3f4f6;*/ /* subtle gray background */
+/*}
+
+.auth-container {
+    max-width: 400px;
+    width: 100%;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+}
+.auth-box {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo-icon {
+    margin-bottom: 1.5rem;
+}
+
+.auth-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.auth-form {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}*/
+
+
+
+/* Custom CSS for Brevo Login Page */
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5f2f0;
+    margin: 0;
+    padding: 0;
+}
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.h-100 {
+    height: 100vh;
+}
+
+.brevo-logo {
+    color: #00A693;
+    margin-bottom: 2rem;
+}
+
+.login-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: none;
+    overflow: hidden;
+}
+
+.login-title {
+    color: #1f2d3d;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    color: #1f2d3d;
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.required-asterisk {
+    color: #ff6b6b;
+    margin-left: 2px;
+}
+
+.login-input {
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #fff;
+}
+
+    .login-input:focus {
+        border-color: #00A693;
+        box-shadow: 0 0 0 0.2rem rgba(0, 166, 147, 0.1);
+        outline: none;
+    }
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+}
+
+    .password-toggle:hover {
+        color: #495057;
+    }
+
+    .password-toggle:focus {
+        outline: none;
+        color: #00A693;
+    }
+
+.login-btn {
+    background-color: #333;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+}
+
+    .login-btn:hover {
+        background-color: #222;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .login-btn:focus {
+        background-color: #222;
+        box-shadow: 0 0 0 0.2rem rgba(51, 51, 51, 0.2);
+    }
+
+.or-divider {
+    position: relative;
+    margin: 1.5rem 0;
+}
+
+    .or-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: #e1e5e9;
+    }
+
+.or-text {
+    background-color: white;
+    color: #6c757d;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+.social-btn {
+    border: 1px solid #e1e5e9;
+    background-color: white;
+    color: #333;
+    border-radius: 8px;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .social-btn:hover {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        color: #333;
+    }
+
+    .social-btn:focus {
+        background-color: #f8f9fa;
+        border-color: #00A693;
+        box-shadow: 0 0 0 0.2rem rgba(0, 166, 147, 0.1);
+        color: #333;
+    }
+
+    .social-btn svg {
+        flex-shrink: 0;
+    }
+
+.login-footer {
+    position: absolute;
+    bottom: 2rem;
+    left: 0;
+    right: 0;
+    padding: 0 1rem;
+}
+
+.footer-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+    .footer-link:hover {
+        color: #00A693;
+        text-decoration: underline;
+    }
+
+    .footer-link:focus {
+        color: #00A693;
+        outline: none;
+        text-decoration: underline;
+    }
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .login-container {
+        padding: 1rem;
+    }
+
+    .login-card {
+        margin-bottom: 4rem;
+    }
+
+    .login-footer {
+        position: relative;
+        margin-top: 2rem;
+        bottom: auto;
+    }
+
+    .footer-link {
+        display: block;
+        margin: 0.5rem 0;
+    }
+
+        .footer-link.me-4 {
+            margin-right: 0 !important;
+        }
+}
+
+@media (min-width: 577px) and (max-height: 700px) {
+    .login-footer {
+        position: relative;
+        margin-top: 2rem;
+        bottom: auto;
+    }
+}
+
+/* Focus styles for accessibility */
+.login-input:focus,
+.login-btn:focus,
+.social-btn:focus,
+.password-toggle:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+/* Animation for smooth interactions */
+.login-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading state for buttons */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+}
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

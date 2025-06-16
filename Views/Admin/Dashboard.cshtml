@@ -1,0 +1,122 @@
+@model EmailCampaignApp.Models.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="admin-dashboard-page">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3h18v18H3z"></path>
+                    <path d="M9 3v18"></path>
+                    <path d="M15 3v18"></path>
+                </svg>
+                Admin Dashboard
+            </h1>
+        </div>
+    </div>
+
+    <div class="dashboard-overview">
+        <h4>Total Users: @Model.TotalUsers</h4>
+    </div>
+
+    <!-- Success and Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="users-table-wrapper">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>
+                        <div class="th-content">
+                            <span>Username</span>
+                            <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 15l5 5 5-5"></path>
+                                <path d="M7 9l5-5 5 5"></path>
+                            </svg>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="th-content">
+                            <span>Email</span>
+                            <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 15l5 5 5-5"></path>
+                                <path d="M7 9l5-5 5 5"></path>
+                            </svg>
+                        </div>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr class="user-row">
+                        <td>@user.UserName</td>
+                        <td>
+                            <a href="mailto:@user.Email" class="user-email">@user.Email</a>
+                        </td>
+                        <td>
+                            <a asp-action="ManageRoles" asp-route-userId="@user.Id" class="btn btn-manage">
+                                <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2l3 7h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z"></path>
+                                </svg>
+                                Manage Roles
+                            </a>
+                            <a asp-action="EditUser" asp-route-userId="@user.Id" class="btn btn-edit">
+                                <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                </svg>
+                                Edit
+                            </a>
+                            <a asp-action="DeleteUser" asp-route-userId="@user.Id" class="btn btn-delete" onclick="return confirm('Are you sure you want to delete this user?')">
+                                <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 6h18M6 6v12h12V6M9 6l3-3 3 3"></path>
+                                </svg>
+                                Delete
+                            </a>
+
+                            <!-- Block/Unblock User Button -->
+                            @if (user.LockoutEnd == null || user.LockoutEnd < DateTimeOffset.UtcNow)
+                            {
+                                <!-- User is not blocked, show "Block" button -->
+                                <a asp-action="BlockUser" asp-route-userId="@user.Id" class="btn btn-warning">
+                                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="4" y1="4" x2="20" y2="20"></line>
+                                    </svg>
+                                    Block
+                                </a>
+                            }
+                            else
+                            {
+                                <!-- User is blocked, show "Unblock" button -->
+                                <a asp-action="UnblockUser" asp-route-userId="@user.Id" class="btn btn-success">
+                                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                    </svg>
+                                    Unblock
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

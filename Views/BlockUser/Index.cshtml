@@ -1,0 +1,66 @@
+@using Microsoft.AspNetCore.Identity
+
+@model List<IdentityUser>
+@{
+    ViewData["Title"] = "Manage Users";
+}
+
+<h2>Manage Users</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>
+                    @if (user.LockoutEnabled && user.LockoutEnd > DateTimeOffset.Now)
+                    {
+                        <span class="text-danger">Blocked</span>
+                    }
+                    else
+                    {
+                        <span class="text-success">Active</span>
+                    }
+                </td>
+                <td>
+                    @if (user.LockoutEnabled && user.LockoutEnd > DateTimeOffset.Now)
+                    {
+                        <a asp-action="UnblockUser" asp-route-userId="@user.Id" class="btn btn-success">
+                            Unblock
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="BlockUser" asp-route-userId="@user.Id" class="btn btn-danger">
+                            Block
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

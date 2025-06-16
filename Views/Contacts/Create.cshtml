@@ -1,0 +1,111 @@
+@model EmailCampaignApp.Models.Contact
+
+@{
+    ViewData["Title"] = "Add Contact";
+}
+
+<div class="add-contact-page">
+    <div class="page-header">
+        <h1 class="page-title">
+            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <line x1="20" y1="8" x2="20" y2="14"></line>
+                <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+            Add New Contact
+        </h1>
+        
+    </div>
+   @*  <partial name="_ValidationScriptsPartial" />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" }) *@
+    <div class="form-container">
+        <form asp-action="Create" class="contact-form" method="post">
+            @* @Html.AntiForgeryToken() *@
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label">
+                        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Full Name
+                    </label>
+                    <div class="input-wrapper">
+                        <input asp-for="Name" class="form-input" placeholder="Enter full name" autocomplete="name" />
+                        <span asp-validation-for="Name" class="validation-message"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">
+                        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        Email Address
+                    </label>
+                    <div class="input-wrapper">
+                        <input asp-for="Email" class="form-input" placeholder="Enter email address" autocomplete="email" />
+                        <span asp-validation-for="Email" class="validation-message"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="PhoneNumber" class="form-label">
+                        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        Phone Number
+                    </label>
+                    <div class="input-wrapper">
+                        <input asp-for="PhoneNumber" class="form-input" placeholder="Enter phone number" autocomplete="tel" />
+                        <span asp-validation-for="PhoneNumber" class="validation-message"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Address" class="form-label">
+                        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        Address
+                    </label>
+                    <div class="input-wrapper">
+                        <textarea asp-for="Address" class="form-input" rows="3" placeholder="Enter full address" autocomplete="street-address"></textarea>
+                        <span asp-validation-for="Address" class="validation-message"></span>
+                    </div>
+                </div>
+            </div>
+                
+            <div class="form-actions">
+                @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                {
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        Back to List
+                    </a>
+                }
+                
+                <a asp-action="Upload" class="btn btn-primary">
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14"></path>
+                    <path d="M5 12h14"></path>
+                </svg>
+                Upload Excel
+            </a>
+                <button type="submit" class="btn btn-primary">
+                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Create Contact
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

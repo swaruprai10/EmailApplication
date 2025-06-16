@@ -1,0 +1,25 @@
+@model EmailCampaignApp.Models.ScheduledEmailsByDateViewModel
+
+@{
+    ViewData["Title"] = "Scheduled Emails on " + Model.Date;
+}
+
+<h1>Scheduled Emails on @Model.Date</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Recipient Email</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var email in Model.Emails)
+        {
+            <tr>
+                <td>@email.RecipientEmail</td>
+                <td>@email.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>

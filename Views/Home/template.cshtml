@@ -1,0 +1,783 @@
+@model string
+
+@{
+    var media = "some value"; // Define 'media' here if it's a variable
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: #d8afac;
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .image-section,
+        .text-section {
+            flex: 1;
+            padding: 20px;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 16px;
+            line-height: 1.5;
+            background: #ffffff;
+        }
+
+        .image-container {
+            height: 100%;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f9f9f9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .resizer {
+            width: 10px;
+            cursor: col-resize;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .resizer:hover {
+            /* background: #ddd; */
+        }
+
+        .resizer::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            height: 50px;
+            width: 4px;
+            background: #ccc;
+            border-radius: 2px;
+        }
+
+        #uploadedImage {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .upload-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .upload-button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .upload-button:hover {
+            background: #357abd;
+        }
+
+        .upload-text {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #campaignModal label,
+        #campaignModal input,
+        #campaignModal button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        #campaignModal input {
+            padding: 5px;
+        }
+
+        #campaignModal button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        #campaignModal button:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Design */
+        @media
+        (max-width: 768px) {
+            .split-layout {
+                flex-direction: column;
+                height: auto;
+                margin: 20px;
+            }
+
+            .resizer {
+                width: 100%;
+                height: 10px;
+                cursor: row-resize;
+            }
+
+            .resizer::after {
+                height: 4px;
+                width: 50px;
+            }
+
+            .image-section,
+            .text-section {
+                min-height: 300px;
+            }
+
+        }
+
+        .remove-image-button {
+            font-size: 24px;
+            color: #000000;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            outline: none;
+        }
+
+        .remove-image-button:hover {
+            color: #ff0000;
+        }
+    </style>
+</head>
+
+<body>
+    <button type="button" class="btn btn-secondary" id="save-draft-btn">Save Draft</button>
+
+    <div class="container">
+        <div style="display: block; margin-left: auto; margin-right: auto;">
+            <div style="
+                padding: 20px;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                background-color: #FFFFFF;
+                border: 1px solid #ccc;
+                background-size: cover;
+                background-position: center;
+                min-width: 70%;
+                max-width: 600px;
+            ">
+
+                <!-- Header Logo -->
+                <div class="headerlogo" style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 100%;
+                    margin-bottom: 20px;">
+                    <img src="https://jooneli.com.np/img/jooneli.pn" alt="Jooneli Inc. Logo"
+                        style="display: block; margin-left: auto; margin-right: auto; max-width: 150px;" />
+                </div>
+
+                <!-- Header Section -->
+                <div class="text-section" id="headerBlock"
+                    style="white-space: break-spaces; word-break: break-word; overflow-y: auto;">
+                    <textarea id="headerArea" placeholder="Enter header text here..."
+                        style="width: 100%; padding: 10px; text-align:center;font-size:22px;line-height:1.4;font-weight:bold;font-family :Arial, Helvetica, sans-serif"></textarea>
+                </div>
+
+                <!-- Body Section -->
+                <div class="text-section" id="bodyBlock"
+                    style="white-space: break-spaces; word-break: break-word; overflow-y: auto;">
+                    <textarea id="bodyArea" placeholder="Enter body text here..."
+                        style="width: 100%; padding: 10px;text-align:center;font-size:16px;line-height:1.6;font-weight:normal;font-family :Georgia, serif"></textarea>
+                </div>
+
+                <!-- Main Image Upload Section -->
+                <div class="image-section" style="text-align: center;">
+                    <div class="image-container">
+                        <img id="uploadedImage" src="#" alt="Uploaded image" style="width: 100%; display: none;" />
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <input type="file" id="imageUpload" accept="image/*" style="display: none;" />
+                            <button class="upload-button" onclick="document.getElementById('imageUpload').click()"
+                                style="padding: 8px 12px; margin-top: 10px;">
+                                Upload Image
+                            </button>
+                            <p class="upload-text" style="font-size: 12px; color: #555;">
+                                Supported formats: JPG, PNG, GIF
+                            </p>
+                        </div>
+                        <span id="removeImageButton" class="remove-image-button"
+                            style="display: none; margin-top: 10px;" onclick="removeImage()">
+                            &times;
+                        </span>
+                    </div>
+                </div>
+
+                <div id="additionalSections"></div>
+
+                <!-- Add Section Buttons -->
+                <div class="add-section-buttons" style="text-align: center; margin-top: 15px;">
+                    <button type="button" id="addBodyBtn" onclick="addBodySection()" style="padding: 8px 12px;">
+                        Add More Body
+                    </button>
+                    <button type="button" id="addImageBtn" onclick="addImageSection()" style="padding: 8px 12px;">
+                        Add Another Image
+                    </button>
+                </div>
+
+                <!-- Footer Section -->
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                    style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+                    <tr>
+                        <td align="center">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #ffffff; padding: 5%; border-radius: 8px;
+                                          text-align: center; max-width: 600px;">
+                                <tr>
+                                    <td>
+                                        @* <img src="https://jooneli.com.np/img/jooneli.png" alt="Jooneli Inc. Logo" *@
+                                        <img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" alt="Jooneli Inc. Logo"
+                                            width="150"
+                                            style="margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 16px; font-weight: bold; color: #222;">
+                                        Jooneli Inc.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0;">
+                                        Dhobighat-4, Lalitpur, Nepal
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0;">
+                                        📞 Call: (977)-1-5153449 | 📱 Mob: 9801464981, 9801464982
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 5px 0;">
+                                        ✉️ <a href="mailto:sales@jooneli.com"
+                                            style="color: #0073e6; text-decoration: none;">
+                                            sales@jooneli.com
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 0;">
+                                        🌐 <a href="http://www.jooneli.com" target="_blank"
+                                            style="color: #0073e6; text-decoration: none;">
+                                            www.jooneli.com
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+            <div class="resizer" id="resizer"></div>
+        </div>
+    </div>
+
+    <!-- Modal for Saving Draft -->
+    <div id="campaignModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Save Campaign</h2>
+
+            <label for="campaignName">Campaign Name</label>
+            <input type="text" id="campaignName" placeholder="Enter campaign name">
+
+            <label for="campaignDescription">Campaign Description</label>
+            <input type="text" id="campaignDescription" placeholder="Enter campaign description">
+
+            <label for="issueDate">Issue Date</label>
+            <input type="date" id="issueDate">
+
+            <label for="expireDate">Expire Date</label>
+            <input type="date" id="expireDate">
+
+            <button onclick="saveTemplate()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Resizer functionality
+            const resizer = document.getElementById('resizer');
+            const leftSide = document.querySelector('.image-section');
+            let isResizing = false;
+            let startX;
+            let startWidth;
+
+            resizer.addEventListener('mousedown', initResize);
+
+            function initResize(e) {
+                isResizing = true;
+                startX = e.clientX;
+                startWidth = leftSide.offsetWidth;
+
+                document.addEventListener('mousemove', resize);
+                document.addEventListener('mouseup', stopResize);
+            }
+
+            function resize(e) {
+                if (!isResizing) return;
+
+                const newWidth = startWidth + (e.clientX - startX);
+                const containerWidth = leftSide.parentElement.offsetWidth;
+
+                // Limit the min & max
+                if (newWidth > 100 && newWidth < (containerWidth - 100)) {
+                    leftSide.style.flex = '0 0 ' + newWidth + 'px';
+                }
+            }
+
+            function stopResize() {
+                isResizing = false;
+                document.removeEventListener('mousemove', resize);
+                document.removeEventListener('mouseup', stopResize);
+            }
+
+            // Main Image upload
+            const imageUpload = document.getElementById('imageUpload');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+            const removeImageButton = document.getElementById('removeImageButton');
+
+            imageUpload.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file) {
+        const formData = new FormData();
+        formData.append('upload', file);
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        // .then(data => {
+        //     uploadedImage.src = data.fileName; // fully-qualified URL
+        //     uploadedImage.style.display = 'block';
+        //     uploadPlaceholder.style.display = 'none';
+        //     removeImageButton.style.display = 'block';
+        // })
+        .then(data => {
+                            /* uploadedImage.src =data.absoluteUrl; */ // ❌ wrong   // Ensure this is the correct URL returned by your server
+                            uploadedImage.src = data.url; // ✅ correct
+                    uploadedImage.setAttribute('data-upload-url', data.url); //store the real URL for later
+                    uploadedImage.style.display = 'block';
+                            uploadPlaceholder.style.display = 'none';   
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error uploading image. Please try again.');
+        });
+    }
+});
+
+// Remove image
+window.removeImage = function () {
+    const imageUrl = uploadedImage.src;
+    console.log("Image URL being sent for deletion:", imageUrl);  // Log the image URL to verify it's correct
+
+    if (imageUrl && imageUrl !== '#') {
+        fetch('/Home/DeleteImage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ imageUrl: imageUrl })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        // 
+        .then(data=> {
+                    if(data.success){
+                                uploadedImage.src = data.url; // Use the correct property!
+                                uploadedImage.setAttribute('data-upload-url', data.url); // Store the real URL for later
+                                uploadedImage.style.display = 'block';
+                                uploadPlaceholder.style.display = 'none';
+                                        removeImageButton.style.display = 'none';
+                                                alert('Image removed successfully.');
+                    }
+                    else {
+                                alert('Failed to remove image.');
+                         }
+        })                                               
+        // .then(data => {
+        //     if (data.success) {
+        //         uploadedImage.src = '#';
+        //         uploadedImage.style.display = 'none';
+        //         uploadPlaceholder.style.display = 'block';
+        //         removeImageButton.style.display = 'none';
+        //         alert('Image removed successfully.');
+        //     } else {
+        //         alert('Failed to remove image.');
+        //     }
+        // })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing image. Please try again.');
+        });
+    }
+};
+
+
+            // Handle drag & drop for the main image container
+            const imageContainer = document.querySelector('.image-container');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                imageContainer.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                imageContainer.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                imageContainer.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                imageContainer.style.border = '2px dashed #4a90e2';
+            }
+
+            function unhighlight(e) {
+                imageContainer.style.border = '2px dashed #ccc';
+            }
+
+            imageContainer.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+
+                if (file && file.type.startsWith('image/')) {
+                    imageUpload.files = dt.files;
+                    imageUpload.dispatchEvent(new Event('change'));
+                }
+            }
+
+            // Save Draft -> show modal
+            document.getElementById('save-draft-btn').addEventListener('click', function () {
+                document.getElementById('campaignModal').style.display = 'block';
+            });
+        });
+
+        // Dynamically add BODY section
+        function addBodySection() {
+            let section = document.createElement('div');
+            section.className = 'text-section';
+            let uniqueId = 'bodyArea' + Date.now();
+
+            section.innerHTML = `
+        <textarea id="${uniqueId}" placeholder="Enter more body text here..."
+                  style="width: 100%; padding: 10px;text-align:center;font-size:16px;line-height:1.6;font-weight:normal;font-family:Georgia, serif"></textarea>
+        <button class="remove-section-button" onclick="removeSection(this)">&times;</button>
+    `;
+            document.getElementById('additionalSections').appendChild(section);
+        }
+
+        // Function to remove a section
+        function removeSection(button) {
+            button.parentElement.remove();
+        }
+
+        // Dynamically add IMAGE section
+        function addImageSection() {
+            let section = document.createElement('div');
+            section.className = 'section-block';
+
+            let uniqueId = 'imageUpload' + Date.now();
+            let imageId = 'uploadedImage' + Date.now();
+            let placeholderId = 'uploadPlaceholder' + Date.now();
+
+            section.innerHTML = `
+        <div class="image-section">
+            <div class="image-container" style="text-align:center;">
+                <img id="${imageId}" src="#" alt="Uploaded image"
+                     style="width: 100%; display: none;" />
+                <div class="upload-placeholder" id="${placeholderId}">
+                    <input type="file" id="${uniqueId}" accept="image/*" style="display: none;"
+                           onchange="previewImage(event, '${imageId}', '${placeholderId}', '${uniqueId}')" />
+                    <button class="upload-button" onclick="document.getElementById('${uniqueId}').click()">
+                        Upload Image
+                    </button>
+                    <p class="upload-text">Supported formats: JPG, PNG, GIF</p>
+                </div>
+                <span id="removeImageButton${uniqueId}" class="remove-image-button" style="display: none; margin-top: 10px;" onclick="removeImage('${imageId}', '${placeholderId}', '${uniqueId}')">
+                    &times;
+                </span>
+            </div>
+            <button class="remove-section-button" onclick="removeSection(this)">&times;</button>
+        </div>
+    `;
+
+            document.getElementById('additionalSections').appendChild(section);
+        }
+
+        // Function to remove a section
+        function removeSection(button) {
+            button.parentElement.remove();
+        }
+
+        // Called by the dynamically added <input> onchange
+        function previewImage(event, imageId, placeholderId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("upload", file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+           .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        // .then(data => {
+                //     let imgElement = document.getElementById(imageId);
+                //     let placeholder = document.getElementById(placeholderId);
+                //     let absoluteUrl = data.fileName; // Ensure absolute URL
+
+                //     imgElement.src = absoluteUrl; // public URL
+                //     imgElement.style.display = "block";
+                //     placeholder.style.display = "none";
+                // })
+           .then(data => {
+            let imgElement = document.getElementById(imageId);
+            let placeholder = document.getElementById(placeholderId);
+
+            imgElement.src = data.url; // ✅ correct
+            imgElement.setAttribute('data-upload-url', data.url);
+            imgElement.style.display = "block";
+            placeholder.style.display = "none";
+            })
+
+           .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error uploading image. Please try again.');
+                        });
+                }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('campaignModal').style.display = 'none';
+        }
+
+        function getReplacedContainerHTML() {
+    // Ensure `.container` exists
+    let container = document.querySelector('.container');
+
+    if (!container) {
+        console.error("No .container found in the document.");
+        return "";
+    }
+
+    // Clone `.container` to work with a copy, avoiding DOM changes
+    let containerClone = container.cloneNode(true);
+
+    // Remove all `<script>` and `<meta>` tags to ensure clean HTML
+    containerClone.querySelectorAll("script, meta").forEach(tag => tag.remove());
+
+    // Replace all <textarea> elements with <div> containing their text
+    containerClone.querySelectorAll('textarea').forEach(textarea => {
+        let replacement = document.createElement('div');
+        replacement.style.whiteSpace = 'pre-wrap'; // Preserve line breaks
+        replacement.textContent = textarea.value.trim();
+
+        // Apply specific styling based on ID
+        if (textarea.id === 'headerArea') {
+            replacement.style.textAlign = 'center';
+            replacement.id = 'headerArea';
+            replacement.style.fontSize = '22px';
+            replacement.style.lineHeight = '1.4';
+            replacement.style.marginBottom = '10px';
+            replacement.style.color = '#333';
+            replacement.style.fontWeight = 'bold';
+            replacement.style.fontFamily = 'Arial, Helvetica, sans-serif';
+        } else if (textarea.id === 'bodyArea' || textarea.id.startsWith('bodyArea')) {
+            replacement.style.textAlign = 'center';
+            replacement.id = 'bodyArea';
+            replacement.style.fontSize = '16px';
+            replacement.style.lineHeight = '1.6';
+            replacement.style.color = '#444';
+            replacement.style.marginBottom = '15px';
+            replacement.style.fontWeight = 'normal';
+            replacement.style.fontFamily = 'Georgia, serif';
+        }
+
+        textarea.parentNode.replaceChild(replacement, textarea);
+    });
+
+    // Remove unwanted elements like buttons, modals, and resizers
+    // In addition to remove-section-button, you can remove any other element you don't want
+    containerClone.querySelectorAll('.remove-section-button, .remove-image-button, .add-section-buttons, #save-draft-btn, #campaignModal, #resizer').forEach(element => {
+        element.remove();
+    });
+
+    // Ensure we only return `.container` inner HTML (without `<main>` or `<script>` tags)
+    return containerClone.innerHTML.trim();
+}
+
+
+        // "Save" -> calls /Email/SaveTemplate with final HTML
+        function saveTemplate() {
+            const name = document.getElementById('campaignName').value;
+            const description = document.getElementById('campaignDescription').value;
+            const issueDate = document.getElementById('issueDate').value;
+            const expireDate = document.getElementById('expireDate').value;
+
+            if (name && description && issueDate && expireDate) {
+                const templateHtml = getReplacedContainerHTML();
+
+                console.log(templateHtml);
+                // Build form
+                const formData = new FormData();
+                formData.append("name", name);
+                formData.append("description", description);
+                formData.append("template", templateHtml);
+                formData.append("issueDate", issueDate);
+                formData.append("expireDate", expireDate);
+
+                // If the main image was uploaded
+                        const uploadedUrl = uploadedImage.getAttribute('data-upload-url');
+                        if(uploadedUrl){
+                                    formData.append("imageUrl", uploadedUrl);
+                        }
+                // const uploadedImage = document.getElementById('uploadedImage');
+                // if (uploadedImage.src && uploadedImage.src !== '#') {
+                //     formData.append("imageUrl", uploadedImage.src);
+                // }
+                console.log({ ...formData });
+                fetch('/Email/SaveTemplate', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Template saved successfully!');
+                            // closeModal();
+                            window.location.href = `/Email/Campaigns`;
+                        } else {
+                            alert('Failed to save template.');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        alert('An error occurred while saving the template.');
+                    });
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+    </script>
+</body>
+
+</html>

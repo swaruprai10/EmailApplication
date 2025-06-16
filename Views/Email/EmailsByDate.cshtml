@@ -1,0 +1,27 @@
+@model EmailCampaignApp.Models.EmailsByDateViewModel
+
+@{
+    ViewData["Title"] = "Emails Sent on " + Model.Date;
+}
+
+<h1>Emails Sent on @Model.Date</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Recipient Email</th>
+            <th>Status</th>
+            <th>Opened</th> <!-- Add a column for the opened status -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var email in Model.Emails)
+        {
+            <tr>
+                <td>@email.RecipientEmail</td>
+                <td>@email.Status</td>
+                <td>@(email.IsOpened ? "Seen" : "Unseen")</td> <!-- Display Seen or Unseen -->
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,372 @@
+@model Campaign
+
+@{
+    ViewData["Title"] = "Update Email Template";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: #d8afac;
+            min-height: 100vh;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .upload-button {
+            background: #4a90e2;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .upload-button:hover {
+            background: #357abd;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .modal input, .modal button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .modal button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .modal button:hover {
+            background-color: #45a049;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        #loading-overlay div {
+            color: white;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2 style="text-align: center;">Update Email Template</h2>
+
+    <div class="container">
+        <!-- Editable Template Content -->
+        <div id="templateEditor"></div>
+
+        <!-- Save Changes Button -->
+        <button id="save-draft-btn" class="upload-button">Save Changes</button>
+    </div>
+
+    <!-- Modal for Saving Draft -->
+    <div id="campaignModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Save Campaign</h2>
+
+            <label for="campaignName">Campaign Name</label>
+            <input type="text" id="campaignName" value="@Model.Name" placeholder="Enter campaign name">
+
+            <label for="campaignDescription">Campaign Description</label>
+            <input type="text" id="campaignDescription" value="@Model.Description" placeholder="Enter campaign description">
+
+            <label for="issueDate">Issue Date</label>
+            <input type="date" id="issueDate" value="@(Model.IssueDate == default ? "" : Model.IssueDate.ToString("yyyy-MM-dd"))">
+
+            <label for="expireDate">Expire Date</label>
+            <input type="date" id="expireDate" value="@(Model.ExpireDate == default ? "" : Model.ExpireDate.ToString("yyyy-MM-dd"))">
+
+
+
+
+            <button id="saveTemplateBtn">Save</button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div>Saving...</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let savedTemplate = sessionStorage.getItem('emailTemplate');
+            let templateId = sessionStorage.getItem('templateId');
+
+            if (savedTemplate) {
+                let editorContainer = document.getElementById('templateEditor');
+                editorContainer.innerHTML = savedTemplate;
+                console.log(editorContainer);
+                // Convert static text to editable fields
+                editorContainer.querySelectorAll('.text-section div').forEach(div => {
+                    let textarea = document.createElement('textarea');
+                    textarea.value = div.innerText.trim();
+                    textarea.id = div.id;
+                    textarea.style.cssText = div.style.cssText;
+                    div.replaceWith(textarea);
+                });
+            }
+
+            // Save Draft -> Show modal
+            document.getElementById('save-draft-btn').addEventListener('click', function() {
+                document.getElementById('campaignModal').style.display = 'block';
+            });
+
+            // Close modal
+            window.closeModal = function() {
+                document.getElementById('campaignModal').style.display = 'none';
+            };
+
+   document.getElementById('templateEditor').addEventListener('click', function (event) {
+    if (event.target.tagName === 'IMG') {
+        let imgElement = event.target;
+        let oldImageUrl = imgElement.src; // Store the old image URL
+        let fileInput = document.getElementById('imageUpload');
+
+        fileInput.onchange = function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('upload', file);
+
+            // Show loading effect
+            imgElement.style.opacity = "0.5";
+
+            // Function to upload image
+            const uploadImage = () => {
+                return fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                // .then(data => {
+                //     if (data.fileName) {
+                //         imgElement.src = data.fileName; // Set uploaded image URL
+                //     } else {
+                //         throw new Error("Invalid JSON response from server.");
+                //     }
+                // })
+               .then(data => {
+                if (data.url) {
+                imgElement.src = data.url; // ? correct
+                } else {
+                throw new Error("Invalid JSON response from server.");
+                }
+                })
+
+                .catch(error => {
+                    console.error('Upload error:', error);
+                    alert(`Image upload failed: ${error.message}`);
+                })
+                .finally(() => {
+                    imgElement.style.opacity = "1"; // Restore visibility after everything completes
+                });
+            };
+
+            // Check if an image exists before deleting
+            if (oldImageUrl && !oldImageUrl.includes('placeholder') && !oldImageUrl.includes('default') && !oldImageUrl.includes('no-image')) {
+                fetch('/Home/DeleteImage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ imageUrl: oldImageUrl })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        return uploadImage(); // Upload only after deletion
+                    } else {
+                        throw new Error("Failed to delete old image.");
+                    }
+                })
+                .catch(error => {
+                    console.error('Delete error:', error);
+                    alert(`Image delete failed: ${error.message}`);
+                    imgElement.style.opacity = "1"; // Restore opacity even if delete fails
+                });
+            } else {
+                // Directly upload if no existing image
+                uploadImage();
+            }
+        };
+
+        fileInput.click(); // Trigger file input
+    }
+});
+
+
+
+            // Save Template with Loading Indicator
+            document.getElementById('saveTemplateBtn').addEventListener('click', function() {
+                const updatedHtml = getUpdatedHTML();
+                const campaignName = document.getElementById('campaignName').value;
+                const campaignDesc = document.getElementById('campaignDescription').value;
+                const issueDate = document.getElementById('issueDate').value;
+                const expireDate = document.getElementById('expireDate').value;
+
+                if (!campaignName || !campaignDesc || !issueDate || !expireDate) {
+                    alert("Please fill out all fields.");
+                    return;
+                }
+
+                document.getElementById('loading-overlay').style.display = 'flex'; // Show loading indicator
+
+                const formData = new FormData();
+
+                formData.append("templateId", templateId);
+                formData.append("name", campaignName);
+                formData.append("description", campaignDesc);
+                formData.append("template", updatedHtml);
+                formData.append("issueDate", issueDate);
+                formData.append("expireDate", expireDate);
+
+                fetch('/Email/UpdateTemplate', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    document.getElementById('loading-overlay').style.display = 'none'; // Hide loading indicator
+
+                    if (response.ok) {
+                        alert('Template updated successfully!');
+                        sessionStorage.clear();
+                        window.location.href = `/Email/ViewTemplate?id=${templateId}`;
+                    } else {
+                        alert('Failed to update template.');
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('loading-overlay').style.display = 'none'; // Hide loading indicator on error
+                    console.error('Error:', err);
+                    alert('An error occurred while updating the template.');
+                });
+            });
+        });
+
+        function getUpdatedHTML() {
+            const container = document.getElementById('templateEditor');
+            const containerClone = container.cloneNode(true);
+
+            // Replace <textarea> with <div> to save the final structure
+            containerClone.querySelectorAll('textarea').forEach(textarea => {
+                let replacement = document.createElement('div');
+                replacement.style.whiteSpace = 'pre-wrap'; // Preserve line breaks
+                replacement.textContent = textarea.value.trim();
+
+                // Apply specific styling based on ID
+                if (textarea.id === 'headerArea') {
+                    replacement.id = 'headerArea';
+                    replacement.style.textAlign = 'center';
+                    replacement.style.fontSize = '22px';
+                    replacement.style.lineHeight = '1.4';
+                    replacement.style.marginBottom = '10px';
+                    replacement.style.color = '#333';
+                    replacement.style.fontWeight = 'bold';
+                    replacement.style.fontFamily = 'Arial, Helvetica, sans-serif';
+                } else if (textarea.id === 'bodyArea' || textarea.id.startsWith('bodyArea')) {
+                    replacement.id = "bodyArea";
+                    replacement.style.textAlign = 'center';
+                    replacement.style.fontSize = '16px';
+                    replacement.style.lineHeight = '1.6';
+                    replacement.style.color = '#444';
+                    replacement.style.marginBottom = '15px';
+                    replacement.style.fontWeight = 'normal';
+                    replacement.style.fontFamily = 'Georgia, serif';
+                }
+
+                textarea.parentNode.replaceChild(replacement, textarea);
+            });
+
+            return containerClone.innerHTML.trim();
+        }
+
+    </script>
+
+</body>
+</html>

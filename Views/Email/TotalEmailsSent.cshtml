@@ -1,0 +1,30 @@
+@model EmailCampaignApp.Models.TotalEmailsSentViewModel
+
+@{
+    ViewData["Title"] = "Total Emails Sent";
+}
+
+<h1>Total Emails Sent</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Total Emails Sent</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var group in Model.Emails.GroupBy(e => e.LocalSentDate.ToString("g")))
+        {
+            <tr>
+                <td>
+                    <a href="@Url.Action("EmailsByDate", "Email", new { date = group.Key })">
+                        @group.Key
+                    </a>
+                </td>
+                <td>@group.Count()</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

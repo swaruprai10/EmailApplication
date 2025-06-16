@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="full-screen">
+<div class="home-page">
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Welcome to EmailCampaign</h1>
+            <p class="hero-subtitle">Create, manage, and track email campaigns with ease</p>
+            <div class="hero-actions">
+                @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Email" asp-action="SendEmail" class="btn btn-primary">
+                            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                            Start New Campaign
+                        </a>
+
+                        <a asp-controller="Contacts" asp-action="Index" class="btn btn-outline-primary">
+                            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Manage Contacts
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+                            Start New Campaign
+                        </a>
+                        
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">
+                            Manage Contacts
+                        </a>
+                    }
+            </div>
+        </div>
+    </div>
+
+    <div class="features-section">
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+                    </svg>
+                </div>
+                <h3>Email Campaigns</h3>
+                <p>Create and send beautiful email campaigns to your audience with our intuitive editor.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <h3>Contact Management</h3>
+                <p>Organize and manage your contacts efficiently with custom lists and segments.</p>
+            </div>
+
+            
+
+            
+        </div>
+    </div>
+
+    
+</div>
+</div>

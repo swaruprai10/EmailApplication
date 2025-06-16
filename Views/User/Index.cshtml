@@ -1,0 +1,78 @@
+@model List<EmailCampaignApp.Models.Contact>
+
+@{
+    ViewData["Title"] = "Contacts";
+}
+
+
+<div class="contacts-page">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Contacts
+            </h1>
+            <a asp-action="Create" class="btn btn-primary">
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add New Contact
+            </a>
+        </div>
+        
+    </div>
+
+    <div class="contacts-table-wrapper">
+        <table class="contacts-table">
+            <thead>
+                <tr>
+                    <th>
+                        <div class="th-content">
+                            <span>Name</span>
+                            <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 15l5 5 5-5"></path>
+                                <path d="M7 9l5-5 5 5"></path>
+                            </svg>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="th-content">
+                            <span>Email</span>
+                            <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 15l5 5 5-5"></path>
+                                <path d="M7 9l5-5 5 5"></path>
+                            </svg>
+                        </div>
+                    </th>
+                    <th>
+                        
+                    
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var contact in Model)
+                {
+                    <tr class="contact-row">
+                        <td>
+                            <div class="contact-name">
+                                <div class="avatar">@contact.Name[0]</div>
+                                @contact.Name
+                            </div>
+                        </td>
+                        <td>
+                            <a href="mailto:@contact.Email" class="contact-email">@contact.Email</a>
+                        </td>
+                        
+                        
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

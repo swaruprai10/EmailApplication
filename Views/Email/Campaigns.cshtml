@@ -1,0 +1,961 @@
+@* @model IEnumerable<EmailCampaignApp.Models.Campaign>
+
+@{
+    ViewData["Title"] = "Campaigns";
+}
+
+<h2>Campaigns</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" id="successMessage">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<style>
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+<!-- Add New Campaign Button -->
+<div class="mb-3">
+    <a href="@Url.Action("CreateCampaign", "Email")" class="btn btn-success">+ Add New Campaign</a>
+</div>
+
+<!-- Hidden Loading Indicator -->
+<div id="loading" style="display: none;" class="alert alert-info text-center">
+    <span class="spinner-border spinner-border-sm"></span> Sending email, please wait...
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Issue Date</th>
+            <th>Expire Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var campaign in Model)
+        {
+            <tr>
+                <td>@campaign.Name</td>
+                <td>@campaign.Description</td>
+                <td>@campaign.IssueDate.ToShortDateString()</td>
+                <td>@campaign.ExpireDate.ToShortDateString()</td>
+                <td>
+                    <button type="button" class="btn btn-primary send-option-btn" data-id="@campaign.Id">
+                        Send Campaign
+                    </button>
+
+                    <form asp-action="DeleteCampaign" asp-route-id="@campaign.Id" method="post"
+                          onsubmit="return confirm('Are you sure you want to delete this campaign?');" class="d-inline">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+
+                    <a href="@Url.Action("ViewTemplate", "Email", new { id = campaign.Id })" class="btn btn-info btn-sm">
+                        View Template
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal for Send Options -->
+<div id="sendOptionModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Choose Send Option</h2>
+
+        <!-- Email Filter -->
+        <label for="emailFilter">Filter Emails</label>
+        <input type="text" id="emailFilter" placeholder="Search emails">
+
+        <br /><br />
+
+        <!-- Select All Checkbox -->
+        <p><input type="checkbox" id="selectAllEmails"> Select All Emails</p>
+
+        <br /><br />
+
+        <!-- Select Emails to Send -->
+        <label for="emailSelect">Select Emails to Send</label>
+
+        <div id="emailSelectContainer"
+             style="border: 1px solid #ddd; padding: 15px; max-height: 200px; overflow-y: auto; background-color: #f9f9f9;">
+        </div>
+
+        <br /><br />
+
+        <button id="sendNow" class="btn btn-success">Send Now</button>
+        <br /><br />
+        <label for="scheduleDate">Schedule Date and Time</label>
+        <input type="datetime-local" id="scheduleDate">
+        <br /><br />
+        <button id="scheduleSend" class="btn btn-warning">Schedule Send</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let availableEmails = []; // This will hold the available emails for selection
+        let selectedEmails = [];  // This will hold the selected email ids
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('sendOptionModal').style.display = 'none';
+        }
+
+               document.addEventListener("DOMContentLoaded", function () {
+            let selectedEmails = [];
+
+            document.querySelectorAll(".send-option-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const campaignId = button.getAttribute("data-id");
+                    document.getElementById('sendOptionModal').style.display = 'block';
+                    loadEmailList(campaignId);
+                    setupSendOptionHandlers(campaignId);
+                });
+            });
+
+            async function loadEmailList(campaignId) {
+                try {
+                    const response = await fetch(`/Email/GetEmailsForCampaign?id=${campaignId}`);
+                    const emails = await response.json();
+                    const emailSelectContainer = document.getElementById('emailSelectContainer');
+                    emailSelectContainer.innerHTML = '';
+
+                    emails.forEach(email => {
+                        const label = document.createElement('label');
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.value = email.id; // email.id is a string (MongoDB ObjectId)
+                        checkbox.classList.add('email-checkbox');
+                        checkbox.addEventListener('change', function () {
+                            updateSelectedEmails(checkbox);
+                        });
+
+                        label.appendChild(checkbox);
+                        label.appendChild(document.createTextNode(email.address));
+                        emailSelectContainer.appendChild(label);
+                        emailSelectContainer.appendChild(document.createElement('br'));
+                    });
+
+                    document.getElementById('selectAllEmails').addEventListener('change', function () {
+                        selectedEmails = [];
+                        document.querySelectorAll('.email-checkbox').forEach(checkbox => {
+                            checkbox.checked = this.checked;
+                            if (this.checked) {
+                                selectedEmails.push(checkbox.value);
+                            }
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Error loading emails:', error);
+                }
+            }
+
+            function updateSelectedEmails(checkbox) {
+                const emailId = checkbox.value;
+                if (checkbox.checked) {
+                    if (!selectedEmails.includes(emailId)) {
+                        selectedEmails.push(emailId);
+                    }
+                } else {
+                    selectedEmails = selectedEmails.filter(id => id !== emailId);
+                }
+            }
+
+            function setupSendOptionHandlers(campaignId) {
+                document.getElementById('sendNow').onclick = async function () {
+                    if (selectedEmails.length === 0) {
+                        alert("Please select at least one email.");
+                        return;
+                    }
+                    await sendCampaign(campaignId, selectedEmails, null, "SendNow");
+                };
+
+                document.getElementById('scheduleSend').onclick = async function () {
+                    const scheduleDate = document.getElementById('scheduleDate').value;
+                    if (!scheduleDate) {
+                        alert("Please select a valid date and time.");
+                        return;
+                    }
+                    await sendCampaign(campaignId, selectedEmails, scheduleDate, "ScheduleSend");
+                };
+            }
+
+                           async function sendCampaign(campaignId, selectedEmails, scheduleDate, action) {
+            if (selectedEmails.length === 0) {
+                alert("Please select at least one email.");
+                return;
+            }
+
+            if (action === "ScheduleSend" && (!scheduleDate || new Date(scheduleDate) <= new Date())) {
+                alert("Please select a valid future date and time.");
+                return;
+            }
+
+            const loadingIndicator = document.getElementById("loading");
+            loadingIndicator.style.display = "block";
+
+            try {
+                const url = action === "SendNow" ? "/Email/SendNow" : "/Email/ScheduleSend";
+
+                const requestBody = JSON.stringify({
+                    id: campaignId,
+                    emailIds: selectedEmails, // If already strings
+                    // emailIds: selectedEmails.map(id => parseInt(id)), // Convert to integers
+                    scheduleDate: scheduleDate ? new Date(scheduleDate).toISOString() : null // Ensure ISO format
+                });
+                console.log("Sending payload:", requestBody);
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: requestBody
+                });
+
+                const result = await response.text();
+                alert(result.includes("successfully") ? "Success!" : "Error sending campaign!");
+                location.reload();
+            } catch (error) {
+                alert("An unexpected error occurred.");
+            } finally {
+                loadingIndicator.style.display = "none";
+                document.getElementById('sendOptionModal').style.display = 'none';
+            }
+        }
+        });
+
+
+       
+    </script>
+}
+ *@
+
+
+@model IEnumerable<EmailCampaignApp.Models.Campaign>
+
+@{
+    ViewData["Title"] = "Campaigns";
+}
+
+<!-- Bootstrap CSS for responsive design -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="~/css/campaigns.css" asp-append-version="true" />
+
+<div class="container-fluid px-2 px-sm-3 px-md-4">
+    <!-- Enhanced Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-gradient-primary text-white rounded-3 p-4 shadow-sm">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
+                    <div>
+                        <h1 class="mb-2 fw-bold display-6">
+                            <i class="fas fa-envelope-open-text me-3"></i>Email Campaigns
+                        </h1>
+                        <p class="mb-0 opacity-90 fs-5">Manage and send your email marketing campaigns with precision</p>
+                    </div>
+                    <a href="@Url.Action("CreateCampaign", "Email")" class="btn btn-light btn-lg shadow-sm px-4 py-2">
+                        <i class="fas fa-plus me-2"></i>Create New Campaign
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" id="successMessage" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-check-circle me-3 fs-5"></i>
+                <div>
+                    <strong>Success!</strong> @TempData["SuccessMessage"]
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Loading Indicator -->
+    <div id="loading" style="display: none;" class="alert alert-info text-center shadow-sm border-0">
+        <div class="d-flex align-items-center justify-content-center">
+            <div class="spinner-border spinner-border-sm me-3" role="status"></div>
+            <span class="fw-semibold">Processing your request, please wait...</span>
+        </div>
+    </div>
+
+    <!-- Campaign Statistics Cards (Mobile-first) -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body text-center p-3">
+                    <i class="fas fa-paper-plane fs-3 mb-2"></i>
+                    <h6 class="card-title mb-1">Total Campaigns</h6>
+                    <h4 class="mb-0">@Model.Count()</h4>
+                </div>
+            </div>
+        </div>
+        @* <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body text-center p-3">
+                    <i class="fas fa-check-circle fs-3 mb-2"></i>
+                    <h6 class="card-title mb-1">Active</h6>
+                    <h4 class="mb-0">@Model.Count(c => c.Status == "active")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm bg-warning text-white">
+                <div class="card-body text-center p-3">
+                    <i class="fas fa-clock fs-3 mb-2"></i>
+                    <h6 class="card-title mb-1">Scheduled</h6>
+                    <h4 class="mb-0">@Model.Count(c => c.Status == "scheduled")</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm bg-info text-white">
+                <div class="card-body text-center p-3">
+                    <i class="fas fa-edit fs-3 mb-2"></i>
+                    <h6 class="card-title mb-1">Drafts</h6>
+                    <h4 class="mb-0">@Model.Count(c => c.Status == "draft")</h4>
+                </div>
+            </div>
+        </div> *@
+    </div>
+
+    <!-- Desktop Table View (Hidden on mobile/tablet) -->
+    <div class="d-none d-xl-block">
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="card-header bg-light border-0 py-3">
+                <h5 class="mb-0 fw-semibold text-dark">
+                    <i class="fas fa-list me-2"></i>Campaign Overview
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="border-0 fw-semibold px-4 py-3">
+                                <i class="fas fa-tag me-2"></i>Campaign Details
+                            </th>
+                            <th class="border-0 fw-semibold px-4 py-3">
+                                <i class="fas fa-info-circle me-2"></i>Status
+                            </th>
+                            @* <th class="border-0 fw-semibold px-4 py-3">
+                                <i class="fas fa-calendar me-2"></i>Timeline
+                            </th> *@
+                            <th class="border-0 fw-semibold px-4 py-3">
+                                <i class="fas fa-cogs me-2"></i>Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var campaign in Model)
+                        {
+                            <tr class="border-bottom">
+                                <td class="px-4 py-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary rounded-circle p-2 me-3">
+                                            <i class="fas fa-envelope text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1 fw-bold text-dark">@campaign.Name</h6>
+                                            <p class="mb-0 text-muted small">@campaign.Description</p>
+                                        </div>
+                                    </div>
+                                </td>
+                               @*  <td class="px-4 py-4">
+                                    @{
+                                        var statusClass = campaign.Status switch
+                                        {
+                                            "active" => "bg-success",
+                                            "scheduled" => "bg-warning",
+                                            "completed" => "bg-secondary",
+                                            "draft" => "bg-info",
+                                            _ => "bg-secondary"
+                                        };
+                                        var statusIcon = campaign.Status switch
+                                        {
+                                            "active" => "fas fa-play",
+                                            "scheduled" => "fas fa-clock",
+                                            "completed" => "fas fa-check",
+                                            "draft" => "fas fa-edit",
+                                            _ => "fas fa-question"
+                                        };
+                                    }
+                                    <span class="badge @statusClass rounded-pill px-3 py-2">
+                                        <i class="@statusIcon me-1"></i>
+                                        @campaign.Status.ToUpper()
+                                    </span>
+                                </td> *@
+                                <td class="px-4 py-4">
+                                    <div class="small">
+                                        <div class="mb-1">
+                                            <i class="fas fa-play-circle text-success me-2"></i>
+                                            <strong>Start:</strong> @campaign.IssueDate.ToString("MMM dd, yyyy")
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-stop-circle text-danger me-2"></i>
+                                            <strong>End:</strong> @campaign.ExpireDate.ToString("MMM dd, yyyy")
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-primary btn-sm send-option-btn" data-id="@campaign.Id">
+                                            <i class="fas fa-paper-plane me-1"></i>Send
+                                        </button>
+                                        <a href="@Url.Action("ViewTemplate", "Email", new { id = campaign.Id })" class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-eye me-1"></i>View
+                                        </a>
+                                        <form asp-action="DeleteCampaign" asp-route-id="@campaign.Id" method="post"
+                                              onsubmit="return confirm('Are you sure you want to delete this campaign?');" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile/Tablet Card View (Visible on mobile and tablet) -->
+    <div class="d-xl-none">
+        <div class="row g-3">
+            @foreach (var campaign in Model)
+            {
+                <div class="col-12 col-md-6">
+                    <div class="card shadow-sm border-0 h-100 campaign-card">
+                        <div class="card-body p-4">
+                            <!-- Card Header -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="bg-primary rounded-circle p-2 me-3">
+                                            <i class="fas fa-envelope text-white"></i>
+                                        </div>
+                                        <h5 class="card-title mb-0 fw-bold">@campaign.Name</h5>
+                                    </div>
+                                    <p class="card-text text-muted mb-3">@campaign.Description</p>
+                                 @*    @{
+                                        var statusclass = campaign.status switch
+                                        {
+                                            "active" => "bg-success",
+                                            "scheduled" => "bg-warning",
+                                            "completed" => "bg-secondary",
+                                            "draft" => "bg-info",
+                                            _ => "bg-secondary"
+                                        };
+                                        var statusicon = campaign.status switch
+                                        {
+                                            "active" => "fas fa-play",
+                                            "scheduled" => "fas fa-clock",
+                                            "completed" => "fas fa-check",
+                                            "draft" => "fas fa-edit",
+                                            _ => "fas fa-question"
+                                        };
+                                    }
+                                    <span class="badge @statusClass rounded-pill px-3 py-2">
+                                        <i class="@statusIcon me-1"></i>
+                                        @campaign.Status.ToUpper()
+                                    </span> *@
+                                </div>
+                            </div>
+
+                            <!-- Timeline Info -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <div class="bg-light rounded-3 p-3 text-center">
+                                        <i class="fas fa-play-circle text-success fs-4 mb-2"></i>
+                                        <div class="small text-muted mb-1">Start Date</div>
+                                        <div class="fw-semibold">@campaign.IssueDate.ToString("MMM dd")</div>
+                                        <div class="small text-muted">@campaign.IssueDate.ToString("yyyy")</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light rounded-3 p-3 text-center">
+                                        <i class="fas fa-stop-circle text-danger fs-4 mb-2"></i>
+                                        <div class="small text-muted mb-1">End Date</div>
+                                        <div class="fw-semibold">@campaign.ExpireDate.ToString("MMM dd")</div>
+                                        <div class="small text-muted">@campaign.ExpireDate.ToString("yyyy")</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-primary btn-lg send-option-btn" data-id="@campaign.Id">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Campaign
+                                </button>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <a href="@Url.Action("ViewTemplate", "Email", new { id = campaign.Id })" class="btn btn-outline-info w-100">
+                                            <i class="fas fa-eye me-2"></i>View Template
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <form asp-action="DeleteCampaign" asp-route-id="@campaign.Id" method="post"
+                                              onsubmit="return confirm('Are you sure you want to delete this campaign?');" class="w-100">
+                                            <button type="submit" class="btn btn-outline-danger w-100">
+                                                <i class="fas fa-trash me-2"></i>Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Modal for Send Options -->
+<div class="modal fade" id="sendOptionModal" tabindex="-1" aria-labelledby="sendOptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white border-0">
+                <h4 class="modal-title fw-bold" id="sendOptionModalLabel">
+                    <i class="fas fa-paper-plane me-3"></i>Send Campaign Options
+                </h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Email Filter Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <label for="emailFilter" class="form-label fw-semibold fs-5 mb-3">
+                            <i class="fas fa-search me-2 text-primary"></i>Filter Recipients
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="emailFilter"
+                                   placeholder="Search by email address or name...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Select All Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card bg-light border-0">
+                            <div class="card-body p-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input fs-5" type="checkbox" id="selectAllEmails">
+                                    <label class="form-check-label fw-semibold fs-6 ms-2" for="selectAllEmails">
+                                        <i class="fas fa-users me-2 text-primary"></i>Select All Recipients
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Selection Container -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold fs-5 mb-3">
+                            <i class="fas fa-envelope-open me-2 text-primary"></i>Choose Recipients
+                        </label>
+                        <div id="emailSelectContainer" class="border rounded-3 p-3 bg-light"
+                             style="max-height: 400px; overflow-y: auto; min-height: 200px;">
+                            <!-- Email checkboxes will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Count Display -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="alert alert-info border-0 shadow-sm" id="selectedCount" style="display: none;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-info-circle me-3 fs-5"></i>
+                                <div>
+                                    <strong id="selectedCountText">0 recipients selected</strong>
+                                    <div class="small mt-1">Ready to send your campaign to the selected recipients</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light border-0 p-4">
+                <div class="w-100">
+                    <!-- Send Now Button -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button id="sendNow" class="btn btn-success btn-lg w-100 py-3">
+                                <i class="fas fa-paper-plane me-3"></i>
+                                <span class="fw-bold">Send Campaign Now</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Section -->
+                    <div class="border-top pt-4">
+                        <label for="scheduleDate" class="form-label fw-semibold fs-6 mb-3">
+                            <i class="fas fa-calendar-alt me-2 text-warning"></i>Or Schedule for Later
+                        </label>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-8">
+                                <input type="datetime-local" class="form-control form-control-lg" id="scheduleDate">
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <button id="scheduleSend" class="btn btn-warning btn-lg w-100">
+                                    <i class="fas fa-clock me-2"></i>Schedule Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        let availableEmails = [];
+        let selectedEmails = [];
+        let sendOptionModal;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Initialize Bootstrap modal
+            sendOptionModal = new bootstrap.Modal(document.getElementById('sendOptionModal'));
+
+            // Setup send option button handlers
+            document.querySelectorAll(".send-option-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    const campaignId = button.getAttribute("data-id");
+                    sendOptionModal.show();
+                    loadEmailList(campaignId);
+                    setupSendOptionHandlers(campaignId);
+                });
+            });
+
+            // Setup email filter with debounce
+            let filterTimeout;
+            document.getElementById('emailFilter').addEventListener('input', function() {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(() => {
+                    filterEmails(this.value);
+                }, 300);
+            });
+
+            // Auto-hide success message
+            setTimeout(function() {
+                const successMsg = document.getElementById('successMessage');
+                if (successMsg) {
+                    const alert = new bootstrap.Alert(successMsg);
+                    alert.close();
+                }
+            }, 5000);
+        });
+
+        async function loadEmailList(campaignId) {
+            try {
+                // Show loading state
+                const container = document.getElementById('emailSelectContainer');
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <div class="text-muted">Loading recipients...</div>
+                    </div>
+                `;
+
+                const response = await fetch(`/Email/GetEmailsForCampaign?id=${campaignId}`);
+                const emails = await response.json();
+                availableEmails = emails;
+                selectedEmails = [];
+                renderEmailList(emails);
+                updateSelectedCount();
+
+                // Setup select all handler
+                document.getElementById('selectAllEmails').addEventListener('change', function () {
+                    const checkboxes = document.querySelectorAll('.email-checkbox');
+                    selectedEmails = [];
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                        if (this.checked) {
+                            selectedEmails.push(checkbox.value);
+                        }
+                    });
+                    updateSelectedCount();
+                });
+
+            } catch (error) {
+                console.error('Error loading emails:', error);
+                showAlert('Error loading email list. Please try again.', 'danger');
+                document.getElementById('emailSelectContainer').innerHTML = `
+                    <div class="text-center py-5 text-danger">
+                        <i class="fas fa-exclamation-triangle fs-1 mb-3"></i>
+                        <div>Error loading recipients</div>
+                        <button class="btn btn-outline-primary btn-sm mt-2" onclick="location.reload()">
+                            <i class="fas fa-refresh me-1"></i>Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function renderEmailList(emails) {
+            const container = document.getElementById('emailSelectContainer');
+            container.innerHTML = '';
+
+            if (emails.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-inbox fs-1 mb-3"></i>
+                        <div class="fs-5 mb-2">No recipients found</div>
+                        <div class="small">Try adjusting your search criteria</div>
+                    </div>
+                `;
+                return;
+            }
+
+            emails.forEach(email => {
+                const checkDiv = document.createElement('div');
+                checkDiv.className = 'form-check';
+
+                const checkbox = document.createElement('input');
+                checkbox.className = 'form-check-input email-checkbox fs-5';
+                checkbox.type = 'checkbox';
+                checkbox.value = email.id;
+                checkbox.id = `email_${email.id}`;
+                checkbox.addEventListener('change', function () {
+                    updateSelectedEmails(checkbox);
+                });
+
+                const label = document.createElement('label');
+                label.className = 'form-check-label w-100 cursor-pointer';
+                label.htmlFor = `email_${email.id}`;
+                label.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold text-dark">${email.address}</div>
+                            ${email.firstName ? `<small class="text-muted">${email.firstName} ${email.lastName || ''}</small>` : ''}
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-envelope text-primary"></i>
+                        </div>
+                    </div>
+                `;
+
+                checkDiv.appendChild(checkbox);
+                checkDiv.appendChild(label);
+                container.appendChild(checkDiv);
+            });
+        }
+
+        function filterEmails(searchTerm) {
+            const filteredEmails = availableEmails.filter(email =>
+                email.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (email.firstName && `${email.firstName} ${email.lastName || ''}`.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+            renderEmailList(filteredEmails);
+
+            // Restore selected state for filtered emails
+            selectedEmails.forEach(emailId => {
+                const checkbox = document.getElementById(`email_${emailId}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        function updateSelectedEmails(checkbox) {
+            const emailId = checkbox.value;
+            if (checkbox.checked) {
+                if (!selectedEmails.includes(emailId)) {
+                    selectedEmails.push(emailId);
+                }
+            } else {
+                selectedEmails = selectedEmails.filter(id => id !== emailId);
+            }
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const countElement = document.getElementById('selectedCount');
+            const countText = document.getElementById('selectedCountText');
+
+            if (selectedEmails.length > 0) {
+                countElement.style.display = 'block';
+                countText.textContent = `${selectedEmails.length} recipient${selectedEmails.length !== 1 ? 's' : ''} selected`;
+            } else {
+                countElement.style.display = 'none';
+            }
+        }
+
+        function setupSendOptionHandlers(campaignId) {
+            document.getElementById('sendNow').onclick = async function () {
+                if (selectedEmails.length === 0) {
+                    showAlert("Please select at least one recipient.", "warning");
+                    return;
+                }
+                await sendCampaign(campaignId, selectedEmails, null, "SendNow");
+            };
+
+            document.getElementById('scheduleSend').onclick = async function () {
+                const scheduleDate = document.getElementById('scheduleDate').value;
+                if (!scheduleDate) {
+                    showAlert("Please select a valid date and time.", "warning");
+                    return;
+                }
+                if (selectedEmails.length === 0) {
+                    showAlert("Please select at least one recipient.", "warning");
+                    return;
+                }
+                if (new Date(scheduleDate) <= new Date()) {
+                    showAlert("Please select a future date and time.", "warning");
+                    return;
+                }
+                await sendCampaign(campaignId, selectedEmails, scheduleDate, "ScheduleSend");
+            };
+        }
+
+        async function sendCampaign(campaignId, selectedEmails, scheduleDate, action) {
+            if (selectedEmails.length === 0) {
+                showAlert("Please select at least one recipient.", "warning");
+                return;
+            }
+
+            if (action === "ScheduleSend" && (!scheduleDate || new Date(scheduleDate) <= new Date())) {
+                showAlert("Please select a valid future date and time.", "warning");
+                return;
+            }
+
+            const loadingIndicator = document.getElementById("loading");
+            loadingIndicator.style.display = "block";
+
+            // Disable buttons during sending
+            const sendButtons = document.querySelectorAll('#sendNow, #scheduleSend');
+            sendButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Processing...`;
+            });
+
+            try {
+                const url = action === "SendNow" ? "/Email/SendNow" : "/Email/ScheduleSend";
+
+                const requestBody = JSON.stringify({
+                    id: campaignId,
+                    emailIds: selectedEmails,
+                    scheduleDate: scheduleDate ? new Date(scheduleDate).toISOString() : null
+                });
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: requestBody
+                });
+
+                const result = await response.text();
+
+                if (result.includes("successfully")) {
+                    showAlert(`Campaign ${action === "SendNow" ? "sent" : "scheduled"} successfully to ${selectedEmails.length} recipients!`, "success");
+                    sendOptionModal.hide();
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showAlert("Error processing campaign. Please try again.", "danger");
+                }
+            } catch (error) {
+                console.error('Send error:', error);
+                showAlert("An unexpected error occurred. Please try again.", "danger");
+            } finally {
+                loadingIndicator.style.display = "none";
+
+                // Re-enable buttons
+                sendButtons.forEach((btn, index) => {
+                    btn.disabled = false;
+                    btn.innerHTML = index === 0 ?
+                        '<i class="fas fa-paper-plane me-3"></i><span class="fw-bold">Send Campaign Now</span>' :
+                        '<i class="fas fa-clock me-2"></i>Schedule Send';
+                });
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed shadow-lg`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 350px; border-radius: 10px;';
+
+            const icon = type === 'success' ? 'fas fa-check-circle' :
+                        type === 'warning' ? 'fas fa-exclamation-triangle' :
+                        'fas fa-exclamation-circle';
+
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="${icon} me-3 fs-5"></i>
+                    <div class="flex-grow-1">${message}</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(alertDiv);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    const alert = new bootstrap.Alert(alertDiv);
+                    alert.close();
+                }
+            }, 5000);
+        }
+    </script>
+}

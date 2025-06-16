@@ -1,0 +1,1341 @@
+@* @model List<EmailCampaignApp.Models.Contact>
+
+@{
+    ViewData["Title"] = "Contacts";
+}
+@{
+    var media = "some value"; // Define 'media' here if it's a variable
+}
+
+<style>
+    /* Search bar container */
+    .search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: #f8f9fa; /* Light background */
+        border: 2px solid #ddd;
+        border-radius: 25px;
+        padding: 8px 15px 8px 35px; /*leave space for icon*/
+        width: 100%; /* width: 300px; */
+        max-width:300px;
+        transition: all 0.3s ease-in-out;
+        margin:0 auto;
+    }
+
+    /* Search input */
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 16px;
+        padding-left: 5px; /* padding-left: 35px; */
+        /* width: 100%; */
+    }
+
+    /* Search icon */
+    .search-wrapper .icon {
+        position: absolute;
+        left: 10px;
+        width: 18px;
+        height: 18px;
+        color: #555;
+    }
+
+    /* Focus effect */
+    .search-wrapper:focus-within {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) 
+    {
+        .search-wrapper
+    {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .search-input {
+        font-size: 14px;
+    }
+
+    }
+
+    /* Contacts table styles */
+    .contacts-table-wrapper {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .contacts-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 16px;
+        background-color: #fff;
+    }
+
+    .contacts-table th, .contacts-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .contacts-table th {
+        background-color: #f8f9fa;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .contacts-table th .th-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .contacts-table th .sort-icon {
+        margin-left: 5px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .contacts-table th .sort-icon:hover {
+        transform: scale(1.1);
+    }
+
+    .contacts-table tbody tr {
+        transition: background-color 0.2s;
+    }
+
+    .contacts-table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .contacts-table tbody tr.contact-row td {
+        position: relative;
+    }
+
+    .contacts-table tbody tr.contact-row td .contact-name {
+        display: flex;
+        align-items: center;
+    }
+
+    .contacts-table tbody tr.contact-row td .contact-name .avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #007bff;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+    }
+    .contacts-table tbody tr.contact-row td .contact-email {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .contacts-table tbody tr.contact-row td .contact-email:hover {
+        text-decoration: underline;
+    }
+
+    .contacts-table tbody tr.contact-row td .actions-container {
+        display: flex;
+        gap: 10px;
+    }
+
+    .contacts-table tbody tr.contact-row td .actions-container .btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        font-size: 14px;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .contacts-table tbody tr.contact-row td .actions-container .btn.btn-edit {
+        background-color: #28a745; /* Green */
+    }
+
+    .contacts-table tbody tr.contact-row td .actions-container .btn.btn-delete {
+        background-color: #dc3545; /* Red */
+    }
+
+    .contacts-table tbody tr.contact-row td .actions-container .btn:hover {
+        opacity: 0.8;
+    }
+
+    .contacts-table tbody tr.contact-row td .delete-form {
+        display: inline;
+    }
+
+    .contacts-table tbody tr.contact-row td .delete-form button {
+        background: none;
+        border: none;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .contacts-table tbody tr.contact-row td .delete-form button:hover {
+        color: #dc3545; /* Red */
+    }
+
+    .contacts-table tbody tr.contact-row td .delete-form button:focus {
+        outline: none;
+    }
+
+    .contacts-table tbody tr.contact-row td .delete-form button .icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .contacts-table tbody tr.contact-row td .delete-form button:hover .icon {
+        color: #dc3545; /* Red */
+    }
+
+    .contacts-table tbody tr.contact-row td .delete-form button:focus .icon {
+        outline: none;
+    }
+
+
+</style>
+
+
+<div class="contacts-page">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Contacts
+            </h1>
+            <a asp-action="Create" class="btn btn-primary">
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add New Contact
+            </a>
+
+
+
+        </div>
+    </div>
+
+    <div class="search-wrapper">
+        <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" name="searchQuery" placeholder="Search contacts..." value="@ViewBag.SearchQuery" class="search-input" />
+    </div>
+
+
+
+    <div class="contacts-table-wrapper">
+        <table class="contacts-table">
+            <thead>
+                <tr>
+                    <th>
+                        <div class="th-content">
+                            <span>Name</span>
+                            <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 15l5 5 5-5"></path>
+                                <path d="M7 9l5-5 5 5"></path>
+                            </svg>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="th-content">
+                            <span>Email</span>
+                            <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 15l5 5 5-5"></path>
+                                <path d="M7 9l5-5 5 5"></path>
+                            </svg>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="th-content">
+                            <span>Phone Number</span>
+                            <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 15l5 5 5-5"></path>
+                                <path d="M7 9l5-5 5 5"></path>
+                            </svg>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="th-content">
+                            <span>Address</span>
+                            <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 15l5 5 5-5"></path>
+                                <path d="M7 9l5-5 5 5"></path>
+                            </svg>
+                        </div>
+                    </th>
+                    <th>Actions</th> <!-- New column for actions -->
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var contact in Model)
+                {
+                    <tr class="contact-row">
+                        <td data-label="Name">
+                            <div class="contact-name">
+                                <div class="avatar">@contact.Name[0]</div>
+                                @contact.Name
+                            </div>
+                        </td>
+                        <td data-label="Email">
+                            <a href="mailto:@contact.Email" class="contact-email">@contact.Email</a>
+                        </td>
+                        <td data-label="Phone Number">@contact.PhoneNumber</td>
+                        <td data-label="Address">@contact.Address</td>
+                        <td data-label="Actions">
+                            <div class="actions-container">
+                            @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@contact.Id" class="btn btn-edit">
+                                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                    </svg>
+                                    Edit
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@contact.Id" method="post" class="delete-form"
+                                      onsubmit="return confirm('Are you sure you want to delete this contact?');">
+                                    <button type="submit" class="btn btn-delete">
+                                        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                             stroke="currentColor" stroke-width="2">
+                                            <path d="M3 6h18"></path>
+                                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <path d="M10 11v6"></path>
+                                            <path d="M14 11v6"></path>
+                                            <path d="M5 6h14l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6z"></path>
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </form>
+                            }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="pagination">
+    @if (ViewBag.Page > 1)
+    {
+        <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="1" class="btn btn-page">First</a>
+        <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@(ViewBag.Page - 1)" class="btn btn-page">Previous</a>
+    }
+
+    @{
+        int maxPagesToShow = 5; // Show only 5 pages at a time like Google
+        int halfRange = maxPagesToShow / 2;
+        int startPage = Math.Max(1, ViewBag.Page - halfRange);
+        int endPage = Math.Min(ViewBag.TotalPages, startPage + maxPagesToShow - 1);
+
+        // Adjust if near the end
+        if (endPage - startPage < maxPagesToShow - 1)
+        {
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+        }
+    }
+
+    @for (int i = startPage; i <= endPage; i++)
+    {
+        <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@i"
+           class="btn btn-page @(ViewBag.Page == i ? "active" : "")">@i</a>
+    }
+
+    @if (ViewBag.Page < ViewBag.TotalPages)
+    {
+        <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@(ViewBag.Page + 1)" class="btn btn-page">Next</a>
+        <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@ViewBag.TotalPages" class="btn btn-page">Last</a>
+    }
+</div>
+
+<script>
+    document.getElementById("searchInput").addEventListener("input", function () {
+        let searchValue = this.value.toLowerCase();
+        let rows = document.querySelectorAll(".contact-row");
+
+        rows.forEach(row => {
+            let name = row.querySelector(".contact-name").textContent.toLowerCase();
+            let email = row.querySelector(".contact-email").textContent.toLowerCase();
+            row.style.display = (name.includes(searchValue) || email.includes(searchValue)) ? "" : "none";
+        });
+    });
+</script> *@
+
+
+@* @model List<EmailCampaignApp.Models.Contact>
+
+@{
+    ViewData["Title"] = "Contacts";
+}
+
+<!-- Bootstrap CSS for responsive design -->
+<link rel="stylesheet" href="~/css/contactindex.css" asp-append-version="true" />
+
+<div class="contacts-page">
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Contacts Management
+            </h1>
+            <a asp-action="Create" class="btn btn-primary">
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add New Contact
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="search-section">
+            <div class="search-wrapper">
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" name="searchQuery" placeholder="Search contacts by name, email, phone, or address..." value="@ViewBag.SearchQuery" class="search-input" />
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="contacts-table-wrapper">
+                <table class="contacts-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="th-content" onclick="sortTable('name')">
+                                    <span>Name</span>
+                                    <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 15l5 5 5-5"></path>
+                                        <path d="M7 9l5-5 5 5"></path>
+                                    </svg>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content" onclick="sortTable('email')">
+                                    <span>Email</span>
+                                    <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 15l5 5 5-5"></path>
+                                        <path d="M7 9l5-5 5 5"></path>
+                                    </svg>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content" onclick="sortTable('phone')">
+                                    <span>Phone Number</span>
+                                    <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 15l5 5 5-5"></path>
+                                        <path d="M7 9l5-5 5 5"></path>
+                                    </svg>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="th-content" onclick="sortTable('address')">
+                                    <span>Address</span>
+                                    <svg class="sort-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M7 15l5 5 5-5"></path>
+                                        <path d="M7 9l5-5 5 5"></path>
+                                    </svg>
+                                </div>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contactsTableBody">
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var contact in Model)
+                            {
+                                <tr class="contact-row">
+                                    <td data-label="Name">
+                                        <div class="contact-name">
+                                            <div class="avatar">@(contact.Name?.Length > 0 ? contact.Name.Substring(0, 1).ToUpper() : "?")</div>
+                                            <span class="contact-name-text">@contact.Name</span>
+                                        </div>
+                                    </td>
+                                    <td data-label="Email">
+                                        <a href="mailto:@contact.Email" class="contact-email">@contact.Email</a>
+                                    </td>
+                                    <td data-label="Phone Number">@contact.PhoneNumber</td>
+                                    <td data-label="Address">@contact.Address</td>
+                                    <td data-label="Actions">
+                                        <div class="actions-container">
+                                            @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@contact.Id" class="btn-edit">
+                                                    <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                                                    </svg>
+                                                    Edit
+                                                </a>
+                                                <form asp-action="Delete" asp-route-id="@contact.Id" method="post" class="delete-form"
+                                                      onsubmit="return confirm('Are you sure you want to delete @contact.Name? This action cannot be undone.');">
+                                                    <button type="submit" class="btn-delete">
+                                                        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                            <path d="M3 6h18"></path>
+                                                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                            <path d="M10 11v6"></path>
+                                                            <path d="M14 11v6"></path>
+                                                            <path d="M5 6h14l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6z"></path>
+                                                        </svg>
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    <svg class="icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                    <h3>No contacts found</h3>
+                                    <p>Start by adding your first contact or adjust your search criteria.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="pagination">
+                @if (ViewBag.Page > 1)
+                {
+                    <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="1" class="btn-page" title="First Page">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 17l-5-5 5-5"></path>
+                            <path d="M18 17l-5-5 5-5"></path>
+                        </svg>
+                    </a>
+                    <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@(ViewBag.Page - 1)" class="btn-page" title="Previous Page">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"></path>
+                        </svg>
+                    </a>
+                }
+
+                @{
+                    int maxPagesToShow = 5;
+                    int halfRange = maxPagesToShow / 2;
+                    int startPage = Math.Max(1, ViewBag.Page - halfRange);
+                    int endPage = Math.Min(ViewBag.TotalPages, startPage + maxPagesToShow - 1);
+
+                    if (endPage - startPage < maxPagesToShow - 1)
+                    {
+                        startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                    }
+                }
+
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@i"
+                       class="btn-page @(ViewBag.Page == i ? "active" : "")" title="Page @i">@i</a>
+                }
+
+                @if (ViewBag.Page < ViewBag.TotalPages)
+                {
+                    <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@(ViewBag.Page + 1)" class="btn-page" title="Next Page">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"></path>
+                        </svg>
+                    </a>
+                    <a asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@ViewBag.TotalPages" class="btn-page" title="Last Page">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M13 17l5-5-5-5"></path>
+                            <path d="M6 17l5-5-5-5"></path>
+                        </svg>
+                    </a>
+                }
+            </div>
+
+            <div class="results-info">
+                Showing @((ViewBag.Page - 1) * 10 + 1) to @(Math.Min(ViewBag.Page * 10, ViewBag.TotalContacts)) of @ViewBag.TotalContacts contacts
+                @if (!string.IsNullOrEmpty(ViewBag.SearchQuery?.ToString()))
+                {
+                    <span>(filtered from total contacts)</span>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // Enhanced search functionality
+    document.getElementById("searchInput").addEventListener("input", function () {
+        const searchValue = this.value.toLowerCase().trim();
+        const rows = document.querySelectorAll(".contact-row");
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.querySelector(".contact-name-text")?.textContent?.toLowerCase() || "";
+            const email = row.querySelector(".contact-email")?.textContent?.toLowerCase() || "";
+            const phone = row.cells[2]?.textContent?.toLowerCase() || "";
+            const address = row.cells[3]?.textContent?.toLowerCase() || "";
+
+            const isVisible = name.includes(searchValue) ||
+                            email.includes(searchValue) ||
+                            phone.includes(searchValue) ||
+                            address.includes(searchValue);
+
+            row.style.display = isVisible ? "" : "none";
+            if (isVisible) visibleCount++;
+        });
+
+        // Update results info if needed
+        updateResultsInfo(visibleCount, searchValue);
+    });
+
+    // Sort functionality
+    let sortDirection = {};
+
+    function sortTable(column) {
+        const table = document.querySelector('.contacts-table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('.contact-row'));
+
+        // Toggle sort direction
+        sortDirection[column] = sortDirection[column] === 'asc' ? 'desc' : 'asc';
+
+        rows.sort((a, b) => {
+            let aValue, bValue;
+
+            switch(column) {
+                case 'name':
+                    aValue = a.querySelector('.contact-name-text')?.textContent || '';
+                    bValue = b.querySelector('.contact-name-text')?.textContent || '';
+                    break;
+                case 'email':
+                    aValue = a.querySelector('.contact-email')?.textContent || '';
+                    bValue = b.querySelector('.contact-email')?.textContent || '';
+                    break;
+                case 'phone':
+                    aValue = a.cells[2]?.textContent || '';
+                    bValue = b.cells[2]?.textContent || '';
+                    break;
+                case 'address':
+                    aValue = a.cells[3]?.textContent || '';
+                    bValue = b.cells[3]?.textContent || '';
+                    break;
+                default:
+                    return 0;
+            }
+
+            aValue = aValue.toLowerCase();
+            bValue = bValue.toLowerCase();
+
+            if (sortDirection[column] === 'asc') {
+                return aValue.localeCompare(bValue);
+            } else {
+                return bValue.localeCompare(aValue);
+            }
+        });
+
+        // Re-append sorted rows
+        rows.forEach(row => tbody.appendChild(row));
+
+        // Update sort icons
+        updateSortIcons(column);
+    }
+
+    function updateSortIcons(activeColumn) {
+        const headers = document.querySelectorAll('.th-content');
+        headers.forEach((header, index) => {
+            const icon = header.querySelector('.sort-icon');
+            const columns = ['name', 'email', 'phone', 'address'];
+            const column = columns[index];
+
+            if (column === activeColumn) {
+                icon.style.opacity = '1';
+                if (sortDirection[column] === 'desc') {
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            } else {
+                icon.style.opacity = '0.5';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
+
+    function updateResultsInfo(visibleCount, searchTerm) {
+        const resultsInfo = document.querySelector('.results-info');
+        if (resultsInfo && searchTerm) {
+            resultsInfo.innerHTML = `Showing ${visibleCount} contacts matching "${searchTerm}"`;
+        }
+    }
+
+    // Smooth scroll for horizontal table on mobile
+    const tableWrapper = document.querySelector('.contacts-table-wrapper');
+    if (tableWrapper) {
+        tableWrapper.addEventListener('scroll', function() {
+            // Add shadow effect when scrolled
+            if (this.scrollLeft > 0) {
+                this.style.boxShadow = 'inset 10px 0 10px -10px rgba(0,0,0,0.1)';
+            } else {
+                this.style.boxShadow = 'none';
+            }
+        });
+    }
+
+    // Enhanced delete confirmation
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const contactName = this.closest('tr').querySelector('.contact-name-text').textContent;
+            const confirmed = confirm(`?? Delete Contact\n\nAre you sure you want to permanently delete "${contactName}"?\n\nThis action cannot be undone.`);
+
+            if (!confirmed) {
+                e.preventDefault();
+            }
+        });
+    });
+</script> *@
+
+
+@* @model List<EmailCampaignApp.Models.Contact>
+
+@{
+    ViewData["Title"] = "Contacts";
+}
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<div class="container my-4">
+    <div class="row justify-content-between align-items-center mb-4">
+        <div class="col-md-6">
+            <h1 class="h3">Contacts Management</h1>
+        </div>
+        <div class="col-md-6 text-md-end text-center">
+            <a asp-action="Create" class="btn btn-primary">Add New Contact</a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by name, email, phone..." />
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle text-nowrap">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th class="d-none d-md-table-cell">Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="contactsTable">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var contact in Model)
+                    {
+                        <tr class="contact-row">
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-danger text-white d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">
+                                        @(contact.Name?.Length > 0 ? contact.Name.Substring(0, 1).ToUpper() : "?")
+                                    </div>
+                                    <span>@contact.Name</span>
+                                </div>
+                            </td>
+                            <td><a href="mailto:@contact.Email" class="text-primary text-decoration-none">@contact.Email</a></td>
+                            <td>@contact.PhoneNumber</td>
+                            <td class="d-none d-md-table-cell">@contact.Address</td>
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@contact.Id" class="btn btn-sm btn-success">Edit</a>
+                                        <form asp-action="Delete" asp-route-id="@contact.Id" method="post" class="d-inline delete-form">
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No contacts found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-center mt-3 text-muted">
+        Showing @Model?.Count contacts
+    </div>
+</div>
+
+<script>
+    document.getElementById("searchInput").addEventListener("input", function () {
+        const query = this.value.toLowerCase();
+        const rows = document.querySelectorAll(".contact-row");
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? "" : "none";
+        });
+    });
+
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            const name = this.closest('tr').querySelector('td span')?.textContent;
+            if (!confirm(`Are you sure you want to delete "${name}"? This cannot be undone.`)) {
+                e.preventDefault();
+            }
+        });
+    });
+</script> *@
+
+@* 
+@model List<EmailCampaignApp.Models.Contact>
+
+@{
+    ViewData["Title"] = "Contacts";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!--Custom CSS for Contacts Index -->
+    <link rel="stylesheet" href="~/css/contactindex.css" asp-append-version="true">
+
+</head>
+<body>
+    <!-- Header -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="page-title">
+                        <i class="bi bi-people-fill"></i>
+                        Contacts Management
+                        <span class="contact-count" id="contactCount">@(Model?.Count ?? 0) contacts</span>
+                    </h1>
+                </div>
+                <div class="col-lg-4 text-lg-end text-center mt-3 mt-lg-0">
+                    <a asp-action="Create" class="btn btn-add-contact btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Add New Contact
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="row">
+                <div class="col-12">
+                    <div class="search-input-group">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text"
+                               id="searchInput"
+                               class="form-control search-input"
+                               placeholder="Search contacts by name, email, phone, or address..."
+                               value="@ViewBag.SearchQuery">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" onclick="sortTable('name')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Name</span>
+                                    <i class="bi bi-arrow-up-down sort-icon" id="sort-name"></i>
+                                </div>
+                            </th>
+                            <th scope="col" onclick="sortTable('email')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Email</span>
+                                    <i class="bi bi-arrow-up-down sort-icon" id="sort-email"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="d-mobile-none" onclick="sortTable('phone')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Phone Number</span>
+                                    <i class="bi bi-arrow-up-down sort-icon" id="sort-phone"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="d-mobile-none d-tablet-none" onclick="sortTable('address')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Address</span>
+                                    <i class="bi bi-arrow-up-down sort-icon" id="sort-address"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contactsTableBody">
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var contact in Model)
+                            {
+                                <tr class="contact-row">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="contact-avatar">
+                                                @(contact.Name?.Length > 0 ? contact.Name.Substring(0, 1).ToUpper() : "?")
+                                            </div>
+                                            <span class="contact-name">@contact.Name</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:@contact.Email" class="contact-email">
+                                            <i class="bi bi-envelope me-1"></i>
+                                            @contact.Email
+                                        </a>
+                                    </td>
+                                    <td class="d-mobile-none">
+                                        <i class="bi bi-telephone me-1 text-muted"></i>
+                                        @contact.PhoneNumber
+                                    </td>
+                                    <td class="d-mobile-none d-tablet-none">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i>
+                                        @contact.Address
+                                    </td>
+                                    <td class="text-center">
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                                        {
+                                            <div class="d-flex justify-content-center flex-wrap">
+                                                <a asp-action="Edit" asp-route-id="@contact.Id"
+                                                   class="btn btn-edit btn-action"
+                                                   title="Edit Contact">
+                                                    <i class="bi bi-pencil-square me-1"></i>
+                                                    <span class="d-none d-sm-inline">Edit</span>
+                                                </a>
+                                                <form asp-action="Delete" asp-route-id="@contact.Id" method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirmDelete('@contact.Name');">
+                                                    <button type="submit"
+                                                            class="btn btn-delete btn-action"
+                                                            title="Delete Contact">
+                                                        <i class="bi bi-trash3 me-1"></i>
+                                                        <span class="d-none d-sm-inline">Delete</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    <i class="bi bi-people"></i>
+                                    <h4>No contacts found</h4>
+                                    <p class="mb-0">Start by adding your first contact or adjust your search criteria.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if (ViewBag.TotalPages > 1)
+        {
+            <nav aria-label="Contacts pagination">
+                <ul class="pagination">
+                    @if (ViewBag.Page > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="1" title="First Page">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@(ViewBag.Page - 1)" title="Previous Page">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+
+                    @{
+                        int maxPagesToShow = 5;
+                        int halfRange = maxPagesToShow / 2;
+                        int startPage = Math.Max(1, ViewBag.Page - halfRange);
+                        int endPage = Math.Min(ViewBag.TotalPages, startPage + maxPagesToShow - 1);
+
+                        if (endPage - startPage < maxPagesToShow - 1)
+                        {
+                            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                        }
+                    }
+
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(ViewBag.Page == i ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@i">@i</a>
+                        </li>
+                    }
+
+                    @if (ViewBag.Page < ViewBag.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@(ViewBag.Page + 1)" title="Next Page">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@ViewBag.TotalPages" title="Last Page">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+
+        <!-- Results Info -->
+        @if (ViewBag.TotalContacts > 0)
+        {
+            <div class="results-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <span id="resultsText">
+                    Showing @((ViewBag.Page - 1) * GetItemsPerPage() + 1) to @(Math.Min(ViewBag.Page * GetItemsPerPage(), ViewBag.TotalContacts)) of @ViewBag.TotalContacts contacts
+                </span>
+                @if (!string.IsNullOrEmpty(ViewBag.SearchQuery?.ToString()))
+                {
+                    <span class="text-muted">(filtered from total contacts)</span>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> 
+
+    <!-- Custom JS for Contacts Index -->
+    <script src="~/js/contactindex.js" asp-append-version="true"></script>
+
+
+</body>
+</html>
+
+@functions {
+    private int GetItemsPerPage()
+    {
+        // This would typically be determined by JavaScript and passed to the server
+        // For now, return a default value
+        return 10;
+    }
+} *@
+
+
+
+@model List<EmailCampaignApp.Models.Contact>
+
+@{
+    ViewData["Title"] = "Contacts";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/contactindex.css" asp-append-version="true" />
+
+
+</head>
+<body>
+    <!-- Header -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="page-title">
+                        <i class="bi bi-people-fill"></i>
+                        Contacts Management
+                    </h1>
+                </div>
+                <div class="col-lg-4 text-lg-end text-center mt-3 mt-lg-0">
+                    <a asp-action="Create" class="btn btn-add-contact btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Add New Contact
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="row">
+                <div class="col-12">
+                    <div class="search-input-group">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text"
+                               id="searchInput"
+                               class="form-control search-input"
+                               placeholder="Search contacts by name, email, phone, or address..."
+                               value="@ViewBag.SearchQuery">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col" onclick="sortTable('name')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Name</span>
+                                    <i class="bi bi-arrow-up-down sort-icon" id="sort-name"></i>
+                                </div>
+                            </th>
+                            <th scope="col" onclick="sortTable('email')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Email</span>
+                                    <i class="bi bi-arrow-up-down sort-icon" id="sort-email"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="d-mobile-none" onclick="sortTable('phone')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Phone Number</span>
+                                    <i class="bi bi-arrow-up-down sort-icon" id="sort-phone"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="d-mobile-none d-tablet-none" onclick="sortTable('address')" style="cursor: pointer;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Address</span>
+                                    <i class="bi bi-arrow-up-down sort-icon" id="sort-address"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contactsTableBody">
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var contact in Model)
+                            {
+                                <tr class="contact-row">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="contact-avatar">
+                                                @(contact.Name?.Length > 0 ? contact.Name.Substring(0, 1).ToUpper() : "?")
+                                            </div>
+                                            <span class="contact-name">@contact.Name</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:@contact.Email" class="contact-email">
+                                            <i class="bi bi-envelope me-1"></i>
+                                            @contact.Email
+                                        </a>
+                                    </td>
+                                    <td class="d-mobile-none">
+                                        <i class="bi bi-telephone me-1 text-muted"></i>
+                                        @contact.PhoneNumber
+                                    </td>
+                                    <td class="d-mobile-none d-tablet-none">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i>
+                                        @contact.Address
+                                    </td>
+                                    <td class="text-center">
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
+                                        {
+                                            <div class="d-flex justify-content-center flex-wrap">
+                                                <a asp-action="Edit" asp-route-id="@contact.Id"
+                                                   class="btn btn-edit btn-action"
+                                                   title="Edit Contact">
+                                                    <i class="bi bi-pencil-square me-1"></i>
+                                                    <span class="d-none d-sm-inline">Edit</span>
+                                                </a>
+                                                <form asp-action="Delete" asp-route-id="@contact.Id" method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirmDelete('@contact.Name');">
+                                                    <button type="submit"
+                                                            class="btn btn-delete btn-action"
+                                                            title="Delete Contact">
+                                                        <i class="bi bi-trash3 me-1"></i>
+                                                        <span class="d-none d-sm-inline">Delete</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    <i class="bi bi-people"></i>
+                                    <h4>No contacts found</h4>
+                                    <p class="mb-0">Start by adding your first contact or adjust your search criteria.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if (ViewBag.TotalPages > 1)
+        {
+            <nav aria-label="Contacts pagination">
+                <ul class="pagination">
+                    @if (ViewBag.Page > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="1" title="First Page">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@(ViewBag.Page - 1)" title="Previous Page">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+
+                    @{
+                        int maxPagesToShow = 5;
+                        int halfRange = maxPagesToShow / 2;
+                        int startPage = Math.Max(1, ViewBag.Page - halfRange);
+                        int endPage = Math.Min(ViewBag.TotalPages, startPage + maxPagesToShow - 1);
+
+                        if (endPage - startPage < maxPagesToShow - 1)
+                        {
+                            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+                        }
+                    }
+
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(ViewBag.Page == i ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@i">@i</a>
+                        </li>
+                    }
+
+                    @if (ViewBag.Page < ViewBag.TotalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@(ViewBag.Page + 1)" title="Next Page">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-searchQuery="@ViewBag.SearchQuery" asp-route-page="@ViewBag.TotalPages" title="Last Page">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+
+        <!-- Results Info -->
+        @if (ViewBag.TotalContacts > 0)
+        {
+            <div class="results-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <span id="resultsText">
+                    Showing @((ViewBag.Page - 1) * GetItemsPerPage() + 1) to @(Math.Min(ViewBag.Page * GetItemsPerPage(), ViewBag.TotalContacts)) of @ViewBag.TotalContacts contacts
+                </span>
+                @if (!string.IsNullOrEmpty(ViewBag.SearchQuery?.ToString()))
+                {
+                    <span class="text-muted">(filtered from total contacts)</span>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script src="~/js/contactindex.js" asp-append-version="true"></script>
+</body>
+</html>
+
+@functions {
+    private int GetItemsPerPage()
+    {
+        // This would typically be determined by JavaScript and passed to the server
+        // For now, return a default value
+        return 10;
+    }
+}

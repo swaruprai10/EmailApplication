@@ -1,0 +1,637 @@
+@model string
+
+@{
+    var media = "some value"; // Define 'media' here if it's a variable
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 20px;
+            background-color: #faf6ef;
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+
+
+        .image-section,
+        .text-section {
+            flex: 1;
+            padding: 20px;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 16px;
+            line-height: 1.5;
+            background: #ffffff;
+        }
+
+        .image-container {
+            height: 100%;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f9f9f9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #contentArea {
+            width: 100%;
+            height: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 16px;
+            line-height: 1.5;
+            background: #ffffff;
+        }
+
+        #contentArea:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
+        }
+
+        .resizer {
+            width: 10px;
+            background: #f0f0f0;
+            cursor: col-resize;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .resizer:hover {
+            background: #ddd;
+        }
+
+        .head {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .resizer::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            height: 50px;
+            width: 4px;
+            background: #ccc;
+            border-radius: 2px;
+        }
+
+        #uploadedImage {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        #imageId {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .upload-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .upload-button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .upload-button:hover {
+            background: #357abd;
+        }
+
+        .upload-text {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #campaignModal label,
+        #campaignModal input,
+        #campaignModal button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        #campaignModal input {
+            padding: 5px;
+        }
+
+        #campaignModal button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        #campaignModal button:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Design */
+        @media
+        (max-width: 768px) {
+            .split-layout {
+                flex-direction: column;
+                height: auto;
+                margin: 20px;
+            }
+
+            .resizer {
+                width: 100%;
+                height: 10px;
+                cursor: row-resize;
+            }
+
+            .resizer::after {
+                height: 4px;
+                width: 50px;
+            }
+
+            .image-section,
+            .text-section {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <button type="button" class="btn btn-secondary" id="save-draft-btn">Save Draft</button>
+    <div class="container">
+        <div style="padding: 20px;
+            background-color: #faf6ef;
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            width: 100%;">
+            <div class="headerlogo" style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;">
+                <img src="~/img/jooneli.png" alt="Jooneli Inc. Logo" />
+            </div>
+            <div>
+                <div class="text-section" id="headerBlock">
+                    <textarea id="headerArea" placeholder="Enter header text here..."></textarea>
+                </div>
+
+                <div class="text-section" id="bodyBlock">
+                    <textarea id="bodyArea" placeholder="Enter body text here..."></textarea>
+                </div>
+                <div class="image-section">
+                    <div class="image-container">
+                        <img id="uploadedImage" src="#" alt="Uploaded image" />
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <input type="file" id="imageUpload" accept="image/*" style="display: none;" />
+                            <button class="upload-button" onclick="document.getElementById('imageUpload').click()">
+                                Upload Image
+                            </button>
+                            <p class="upload-text">Supported formats: JPG, PNG, GIF</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="additionalSections"></div>
+
+
+                <div class="add-section-buttons">
+                    <button type="button" id="addBodyBtn" onclick=addBodySection()>Add More Body</button>
+                    <button type="button" id="addImageBtn" onclick=addImageSection()>Add Another Image</button>
+                </div>
+
+                <div class="footer" style="display: flex; flex-direction: column; align-items: flex-end">
+                    <img src="~/img/jooneli.png" alt="Jooneli Inc. Logo" />
+                    <p>Dhobighat-4, Lalitpur, Nepal</p>
+                    <p>Call: (977)-1-5153449</p>
+                    <p>Mob: 9801464981, 9801464982</p>
+                    <p>E-mail: sales@jooneli.com</p>
+                    <p>Website: <a href="http://www.jooneli.com" target="_blank">www.jooneli.com</a></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+
+
+    <!-- Modal for Saving Draft -->
+    <div id="campaignModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Save Campaign</h2>
+
+            <label for="campaignName">Campaign Name</label>
+            <input type="text" id="campaignName" placeholder="Enter campaign name">
+
+            <label for="campaignDescription">Campaign Description</label>
+            <input type="text" id="campaignDescription" placeholder="Enter campaign description">
+
+            <label for="issueDate">Issue Date</label>
+            <input type="date" id="issueDate">
+
+            <label for="expireDate">Expire Date</label>
+            <input type="date" id="expireDate">
+
+            <button onclick="saveTemplate()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Resizer functionality
+            const resizer = document.getElementById('resizer');
+            const leftSide = document.querySelector('.image-section');
+            let isResizing = false;
+            let startX;
+            let startWidth;
+
+            resizer.addEventListener('mousedown', initResize);
+
+            function initResize(e) {
+                isResizing = true;
+                startX = e.clientX;
+                startWidth = leftSide.offsetWidth;
+
+                document.addEventListener('mousemove', resize);
+                document.addEventListener('mouseup', stopResize);
+            }
+
+            function resize(e) {
+                if (!isResizing) return;
+
+                const newWidth = startWidth + (e.clientX - startX);
+                const containerWidth = leftSide.parentElement.offsetWidth;
+
+                // Limit the minimum and maximum width
+                if (newWidth > 100 && newWidth < (containerWidth - 100)) {
+                    leftSide.style.flex = '0 0 ' + newWidth + 'px';
+                }
+            }
+
+            function stopResize() {
+                isResizing = false;
+                document.removeEventListener('mousemove', resize);
+                document.removeEventListener('mouseup', stopResize);
+            }
+
+            // Image upload handling
+            const imageUpload = document.getElementById('imageUpload');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+            imageUpload.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('upload', file);
+
+                    fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(dataT=> {
+                                uploadedImage.src = data.url; // Assuming the server returns the URL of the uploaded image
+                                   uploadedImage.setAttribute('data-upload-url', data.url); //store the real Url
+                                uploadedImage.style.display = 'block';
+                                    uploadPlaceholder.style.display = 'none';
+                        })
+                        // .then(data => {
+                        //     uploadedImage.src = data.fileName;
+                        //     uploadedImage.style.display = 'block';
+                        //     uploadPlaceholder.style.display = 'none';
+                        // })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error uploading image. Please try again.');
+                        });
+                }
+            });
+
+            // Handle drag and drop
+            const imageContainer = document.querySelector('.image-container');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                imageContainer.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                imageContainer.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                imageContainer.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                imageContainer.style.border = '2px dashed #4a90e2';
+            }
+
+            function unhighlight(e) {
+                imageContainer.style.border = '2px dashed #ccc';
+            }
+
+            imageContainer.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+
+                if (file && file.type.startsWith('image/')) {
+                    imageUpload.files = dt.files;
+                    imageUpload.dispatchEvent(new Event('change'));
+                }
+            }
+
+            // Auto-save functionality for textarea
+        @* const contentArea = document.getElementById('contentArea');
+            let timeout = null;
+
+            contentArea.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    localStorage.setItem('savedContent', contentArea.value);
+                }, 1000);
+            }); *@
+
+            // Load saved content
+            const savedContent = localStorage.getItem('savedContent');
+            if (savedContent) {
+                contentArea.value = savedContent;
+            }
+
+            // Save Draft functionality
+            document.getElementById('save-draft-btn').addEventListener('click', function () {
+                document.getElementById('campaignModal').style.display = 'block';
+            });
+        });
+        function addBodySection() {
+            let section = document.createElement('div');
+            section.className = 'text-section';
+            let uniqueId = 'bodyArea' + Date.now();
+
+
+            section.innerHTML = ` 
+        <textarea id="${uniqueId}"placeholder="Enter more body text here..."></textarea>
+    `
+            document.getElementById('additionalSections').appendChild(section);
+        }
+
+        // Dynamically add an extra IMAGE section
+        function addImageSection() {
+            let section = document.createElement('div');
+            section.className = 'section-block';
+
+            // Generate unique IDs for each image upload input and preview
+            let uniqueId = 'imageUpload' + Date.now();
+            let imageId = 'uploadedImage' + Date.now();
+            let placeholderId = 'uploadPlaceholder' + Date.now();
+
+            section.innerHTML = `
+        <div class="image-section">
+            <div class="image-container">
+                <img id="${imageId}" src="placeholder.jpg" alt="Uploaded image" style="width: 100%; " />
+                <div class="upload-placeholder" id="${placeholderId}">
+                    <input type="file" id="${uniqueId}" accept="image/*" style="display: none;" onchange="previewImage(event, '${imageId}', '${placeholderId}')" />
+                    <button class="upload-button" onclick="document.getElementById('${uniqueId}').click()">
+                        Upload Image
+                    </button>
+                    <p class="upload-text">Supported formats: JPG, PNG, GIF</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+            document.getElementById('additionalSections').appendChild(section);
+        }
+
+        // Function to preview uploaded images
+        function previewImage(event, imageId, placeholderId) {
+            let reader = new FileReader();
+            reader.onload = function () {
+                let imgElement = document.getElementById(imageId);
+                let placeholder = document.getElementById(placeholderId);
+
+                imgElement.src = reader.result;
+                imgElement.style.display = "block";
+                placeholder.style.display = "none"; // Hide the placeholder once the image is uploaded
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+
+
+
+        function closeModal() {
+            document.getElementById('campaignModal').style.display = 'none';
+        }
+
+        function getReplacedContainerHTML() {
+            // Clone .container so we don't remove textareas from the live DOM
+            let containerClone = document.querySelector('.container').cloneNode(true);
+
+            // Find all textareas in the clone
+            let textareas = containerClone.querySelectorAll('textarea');
+
+            textareas.forEach(textarea => {
+                // Prepare a new element to replace the textarea
+                let replacement = document.createElement('div');
+                replacement.style.whiteSpace = 'pre-wrap'; // preserve line breaks
+
+                if (textarea.id === 'headerArea') {
+                    // Style for header
+                    replacement.style.textAlign = 'center';
+
+                    replacement.style.fontSize = '22px'; // Make header prominent
+                    replacement.style.lineHeight = '1.4';
+                    replacement.style.marginBottom = '10px';
+                    replacement.style.color = '#333';
+                    replacement.style.fontFamily = 'Arial, Helvetica, sans-serif'; //
+                    replacement.style.fontWeight = 'bold';
+                }
+                else if (textarea.id === 'bodyArea' || textarea.id.startsWith('bodyArea')) {
+                    // Style for body
+                    replacement.style.fontWeight = 'normal';
+                    replacement.style.fontSize = '16px';
+                    replacement.style.fontWeight = 'normal';
+                    replacement.style.lineHeight = '1.6';
+                    replacement.style.color = '#444';
+                    replacement.style.marginBottom = '15px';
+                    replacement.style.fontFamily = 'Georgia, serif'; // Classic, good readability
+                }
+                else {
+                    // Fallback style if needed
+                    replacement.style.fontWeight = 'normal';
+                    replacement.style.fontSize = '14px';
+                }
+
+                replacement.textContent = textarea.value.trim();
+
+                // Replace the textarea with the new element
+                textarea.parentNode.replaceChild(replacement, textarea);
+            });
+            let addSectionButtons = containerClone.querySelector('.add-section-buttons');
+            if (addSectionButtons) {
+                addSectionButtons.remove();
+            }
+            let saveDraftButton = containerClone.querySelector('#save-draft-btn');
+            if (saveDraftButton) {
+                saveDraftButton.remove();
+            }
+            // Return the final HTML of the clone
+            return containerClone.innerHTML;
+        }
+
+        function saveTemplate() {
+            var name = document.getElementById('campaignName').value;
+            var description = document.getElementById('campaignDescription').value;
+            var issueDate = document.getElementById('issueDate').value;
+            var expireDate = document.getElementById('expireDate').value;
+
+            if (name && description && issueDate && expireDate) {
+                var templateHtml = getReplacedContainerHTML();
+                console.log(templateHtml); // Save entire template
+                var formData = new FormData();
+                formData.append("name", name);
+                formData.append("description", description);
+                formData.append("template", templateHtml);
+                formData.append("issueDate", issueDate);
+                formData.append("expireDate", expireDate);
+                    // Get the uploaded image URL
+                    const uploadedUrl =uploadedImage.getAttribute('data-upload-url');
+                        if (uploadedUrl) {
+                                formData.append("imageUrl", uploadedUrl);
+                        }
+                // var uploadedImage = document.getElementById('uploadedImage');
+                // if (uploadedImage.src && uploadedImage.src !== '#') {
+                //     formData.append("imageUrl", uploadedImage.src);
+                // }
+
+                fetch('/Email/SaveTemplate', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        alert('Template saved successfully!');
+                        closeModal();
+                    } else {
+                        alert('Failed to save template.');
+                    }
+                });
+            } else {
+                alert("Please fill in all fields.");
+            }
+        }
+    </script>
+</body>
+
+</html>
