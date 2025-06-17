@@ -71,278 +71,104 @@
 } *@
 
 
+
 @model EmailCampaignApp.Models.LoginModel
 @{
     Layout = null;
 }
-@* <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>Login - EmailCampaignApp</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Icons (Optional, for Google & Apple) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #fdf8e7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .login-card {
-            background-color: #fff;
-            border-radius: 16px;
-            padding: 2.5rem 2rem;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .login-logo {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-            .login-logo img {
-                max-width: 140px;
-            }
-
-        .form-label {
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: black;
-            border-color: black;
-        }
-
-        .social-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-weight: 500;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 1.5rem 0;
-        }
-
-            .divider::before,
-            .divider::after {
-                content: '';
-                flex: 1;
-                height: 1px;
-                background: #ccc;
-            }
-
-            .divider:not(:empty)::before {
-                margin-right: .75em;
-            }
-
-            .divider:not(:empty)::after {
-                margin-left: .75em;
-            }
-
-        .login-footer {
-            text-align: center;
-            font-size: 0.9rem;
-            margin-top: 1.5rem;
-        }
-
-            .login-footer a {
-                margin: 0 10px;
-                text-decoration: none;
-            }
-
-        .eye-toggle {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-        }
-
-        .position-relative input {
-            padding-right: 40px;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-logo">
-        <img src="@Url.Content("~/image/main_front_logo.png")" alt="EmailCampaign Logo" />
-    </div>
-    <div class="login-card">
-     
-        <h4 class="text-center mb-3">Log In</h4>
-
-        <form method="post" asp-action="Login">
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">Email address <span class="text-danger">*</span></label>
-                <input asp-for="Email" class="form-control" placeholder="Enter your email" />
-                <span asp-validation-for="Email" class="text-danger small"></span>
-            </div>
-
-            <div class="mb-3 position-relative">
-                <label asp-for="Password" class="form-label">Password <span class="text-danger">*</span></label>
-                <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" id="passwordInput" />
-                <i class="bi bi-eye eye-toggle" id="togglePassword"></i>
-                <span asp-validation-for="Password" class="text-danger small"></span>
-            </div>
-
-            <div class="d-grid mb-3">
-                <button type="submit" class="btn btn-primary">Log In</button>
-            </div>
-
-            <div class="divider">OR</div>
-
-            <div class="d-grid gap-2 mb-2">
-                <button type="button" class="btn social-btn">
-                    <i class="bi bi-google"></i> Sign in with Google
-                </button>
-               @*  <button type="button" class="btn social-btn">
-                    <i class="bi bi-apple"></i> Sign in with Apple
-                </button> *@
-  @*           </div>
-        </form>
-
-       @*  <div class="login-footer">
-            <a href="#">Create an account</a>
-            <a href="#">I forgot my password</a>
-        </div> *@
-@*     </div>
-
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Show/Hide Password
-        document.getElementById("togglePassword").addEventListener("click", function () {
-            const pwd = document.getElementById("passwordInput");
-            const type = pwd.getAttribute("type") === "password" ? "text" : "password";
-            pwd.setAttribute("type", type);
-            this.classList.toggle("bi-eye");
-            this.classList.toggle("bi-eye-slash");
-        });
-    </script>
-</body>
-</html>  *@ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brevo - Log In</title>
+    <title>EmailCampaign - Log In</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="~/css/login.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
 </head>
 <body>
     <div class="login-container">
-        <div class="container-fluid h-100">
-            <div class="row justify-content-center align-items-center h-100">
-                <div class="col-11 col-sm-8 col-md-6 col-lg-4 col-xl-3">
-                    <!-- Brevo Logo -->
-                    <div class="text-center mb-4">
-                        <div class="brevo-logo">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="36" fill="currentColor" viewBox="0 0 90 28">
-                                <path fill="#00A693" d="M73.825 17.178c0-4.037 2.55-6.876 6.175-6.876 3.626 0 6.216 2.838 6.216 6.876 0 4.04-2.59 6.716-6.216 6.716-3.626 0-6.175-2.8-6.175-6.716Zm-3.785 0c0 5.957 4.144 10.155 9.96 10.155 5.816 0 10-4.198 10-10.155 0-5.957-4.144-10.314-10-10.314-5.857 0-9.96 4.279-9.96 10.314ZM50.717 7.104l7.81 19.989h3.665l7.81-19.99h-3.945l-5.658 15.433h-.08L54.662 7.104h-3.945Zm-15.18 9.354c.239-3.679 2.67-6.156 5.977-6.156 2.867 0 5.02 1.84 5.338 4.598h-6.614c-2.35 0-3.626.28-4.58 1.56h-.121v-.002Zm-3.784.6c0 5.957 4.183 10.274 9.96 10.274 3.904 0 7.33-1.999 8.803-5.158l-3.186-1.6c-1.115 2.079-3.267 3.318-5.618 3.318-2.83 0-5.379-2.159-5.379-4.238 0-1.078.718-1.56 1.753-1.56h12.63v-1.078c0-5.997-3.825-10.155-9.323-10.155-5.497 0-9.641 4.278-9.641 10.195M20.916 27.09h3.586V14.82c0-2.64 1.632-4.519 3.905-4.519.956 0 1.951.32 2.43.759.359-.96.917-1.918 1.753-2.878-.957-.799-2.59-1.32-4.184-1.32-4.382 0-7.49 3.278-7.49 7.956v12.274-.002ZM3.586 13.86V4.104h5.896c1.992 0 3.307 1.16 3.307 2.918 0 1.999-1.713 3.518-5.218 4.677-2.39.76-3.466 1.4-3.865 2.16l-.12.001Zm0 9.795v-4.077c0-1.8 1.514-3.558 3.626-4.238 1.873-.64 3.425-1.28 4.74-1.959 1.754 1.04 2.829 2.838 2.829 4.718 0 3.198-3.028 5.556-7.132 5.556H3.586ZM0 27.093h7.968c6.057 0 10.597-3.798 10.597-8.835 0-2.76-1.394-5.237-3.864-6.837 1.275-1.28 1.873-2.759 1.873-4.558 0-3.717-2.67-6.196-6.693-6.196H0v26.426Z"></path>
-                            </svg>
-                        </div>
+        <div class="login-content">
+            <!-- Brevo Logo -->
+            <div class="brevo-logo">
+                <img src="@Url.Content("~/image/main_front_logo.png")" alt="EmailCampaign logo" width="180" height="auto">
+                </img>
+            </div>
+
+            <!-- Login Form Card -->
+            <div class="login-card">
+                <h2 class="login-title">Log In</h2>
+
+                <form method="post" asp-action="Login" id="loginForm">
+                    <!-- Validation Summary -->
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Email Field -->
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">
+                            Email address <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Email" class="form-control" placeholder="" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
                     </div>
 
-                    <!-- Login Form Card -->
-                    <div class="login-card">
-                        <div class="card-body p-4">
-                            <h2 class="login-title text-center mb-4">Log In</h2>
-
-                            <form id="loginForm">
-                                <!-- Email Field -->
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">
-                                        Email address <span class="required-asterisk">*</span>
-                                    </label>
-                                    <input type="email" class="form-control login-input" id="email" name="email" required>
-                                </div>
-
-                                <!-- Password Field -->
-                                <div class="mb-4">
-                                    <label for="password" class="form-label">
-                                        Password <span class="required-asterisk">*</span>
-                                    </label>
-                                    <div class="position-relative">
-                                        <input type="password" class="form-control login-input" id="password" name="password" required>
-                                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
-                                            <i class="far fa-eye" id="eyeIcon"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Login Button -->
-                                <div class="mb-4">
-                                    <button type="submit" class="btn login-btn w-100">Log In</button>
-                                </div>
-                            </form>
-
-                            <!-- OR Divider -->
-                            <div class="or-divider text-center mb-4">
-                                <span class="or-text">OR</span>
-                            </div>
-
-                            <!-- Social Login Buttons -->
-                            <div class="social-buttons">
-                                <button type="button" class="btn social-btn w-100 mb-3" id="googleSignIn">
-                                    <svg height="20" width="20" viewBox="0 0 256 262" class="me-2">
-                                        <path d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027" fill="#4285F4"></path>
-                                        <path d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1" fill="#34A853"></path>
-                                        <path d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782" fill="#FBBC05"></path>
-                                        <path d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251" fill="#EB4335"></path>
-                                    </svg>
-                                    Sign in with Google
-                                </button>
-
-                                <button type="button" class="btn social-btn w-100" id="appleSignIn">
-                                    <svg fill="currentColor" height="20" width="20" viewBox="0 0 18 18" class="me-2">
-                                        <path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516.024.034 1.52.087 2.475-1.258.955-1.345.762-2.391.728-2.43zm3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422.212-2.189 1.675-2.789 1.698-2.854.023-.065-.597-.79-1.254-1.157a3.692 3.692 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56.244.729.625 1.924 1.273 2.796.576.984 1.34 1.667 1.659 1.899.319.232 1.219.386 1.843.067.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758.347-.79.505-1.217.473-1.282z"></path>
-                                    </svg>
-                                    Sign in with Apple
-                                </button>
-                            </div>
+                    <!-- Password Field -->
+                    <div class="mb-4">
+                        <label asp-for="Password" class="form-label">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="password-container">
+                            <input asp-for="Password" type="password" class="form-control" placeholder="" id="passwordInput" />
+                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                                <i class="far fa-eye" id="eyeIcon"></i>
+                            </button>
                         </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
                     </div>
-                </div>
+
+                    <!-- Login Button -->
+                    <div class="d-grid mb-4">
+                        <button type="submit" class="btn btn-primary" id="loginBtn">Log In</button>
+                    </div>
+                </form>
+
+                <!-- OR Divider -->
+                <!--<div class="divider">
+                    <span>OR</span>
+                </div> -->
+
+                <!-- Social Login Buttons -->
+                <!--<div class="d-grid">
+                    <button type="button" class="btn social-btn" id="googleSignIn">
+                        <svg height="20" width="20" viewBox="0 0 256 262">
+                            <path d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027" fill="#4285F4"></path>
+                            <path d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1" fill="#34A853"></path>
+                            <path d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782" fill="#FBBC05"></path>
+                            <path d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251" fill="#EB4335"></path>
+                        </svg>
+                        Sign in with Google
+                    </button>
+
+                    <button type="button" class="btn social-btn" id="appleSignIn">
+                        <svg fill="currentColor" height="20" width="20" viewBox="0 0 18 18">
+                            <path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516.024.034 1.52.087 2.475-1.258.955-1.345.762-2.391.728-2.43zm3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422.212-2.189 1.675-2.789 1.698-2.854.023-.065-.597-.79-1.254-1.157a3.692 3.692 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56.244.729.625 1.924 1.273 2.796.576.984 1.34 1.667 1.659 1.899.319.232 1.219.386 1.843.067.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758.347-.79.505-1.217.473-1.282z"></path>
+                        </svg>
+                        Sign in with Apple
+                    </button>
+                </div> -->
             </div>
         </div>
 
         <!-- Footer -->
-        <footer class="login-footer text-center">
-            <a href="#" class="footer-link me-4">Create an account</a>
+        <!-- <footer class="login-footer">
+            <a href="#" class="footer-link">Create an account</a>
             <a href="#" class="footer-link">I forgot my password</a>
-        </footer>
+        </footer> -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="script.js"></script>
+    <script src="~/js/login.js" asp-append-version="true"></script>
 </body>
 </html>
 

@@ -1,9 +1,8 @@
-﻿// JavaScript for Brevo Login Page
-
+﻿// JavaScript for Login Page Functionality
 document.addEventListener('DOMContentLoaded', function () {
     // Password toggle functionality
-    const passwordToggle = document.getElementById('passwordToggle');
-    const passwordInput = document.getElementById('password');
+    const passwordToggle = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('passwordInput');
     const eyeIcon = document.getElementById('eyeIcon');
 
     if (passwordToggle && passwordInput && eyeIcon) {
@@ -26,43 +25,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Form validation and submission
+    // Form submission with loading state
     const loginForm = document.getElementById('loginForm');
-    const emailInput = document.getElementById('email');
-    const loginBtn = loginForm.querySelector('button[type="submit"]');
+    const loginBtn = document.getElementById('loginBtn');
 
-    if (loginForm) {
+    if (loginForm && loginBtn) {
         loginForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
             // Add loading state
             loginBtn.classList.add('btn-loading');
             loginBtn.disabled = true;
 
-            // Simulate form submission (replace with actual logic)
-            setTimeout(() => {
-                // Remove loading state
-                loginBtn.classList.remove('btn-loading');
-                loginBtn.disabled = false;
-
-                // Here you would typically handle the actual login
-                console.log('Login submitted:', {
-                    email: emailInput.value,
-                    password: passwordInput.value
-                });
-
-                // For demo purposes, show an alert
-                alert('Login form submitted! (This is just a demo)');
-            }, 2000);
-        });
-
-        // Real-time validation
-        emailInput.addEventListener('blur', function () {
-            validateEmail(this);
-        });
-
-        passwordInput.addEventListener('blur', function () {
-            validatePassword(this);
+            // Note: Form will submit normally to MVC action
+            // Loading state will be visible during server processing
         });
     }
 
@@ -76,11 +50,12 @@ document.addEventListener('DOMContentLoaded', function () {
             this.classList.add('btn-loading');
             this.disabled = true;
 
+            // Here you would implement Google OAuth
             setTimeout(() => {
                 this.classList.remove('btn-loading');
                 this.disabled = false;
                 console.log('Google Sign-In clicked');
-                alert('Google Sign-In clicked! (This is just a demo)');
+                // Implement actual Google OAuth logic here
             }, 1500);
         });
     }
@@ -91,17 +66,18 @@ document.addEventListener('DOMContentLoaded', function () {
             this.classList.add('btn-loading');
             this.disabled = true;
 
+            // Here you would implement Apple OAuth
             setTimeout(() => {
                 this.classList.remove('btn-loading');
                 this.disabled = false;
                 console.log('Apple Sign-In clicked');
-                alert('Apple Sign-In clicked! (This is just a demo)');
+                // Implement actual Apple OAuth logic here
             }, 1500);
         });
     }
 
     // Input focus animations
-    const inputs = document.querySelectorAll('.login-input');
+    const inputs = document.querySelectorAll('.form-control');
     inputs.forEach(input => {
         input.addEventListener('focus', function () {
             this.parentElement.classList.add('focused');
@@ -113,93 +89,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Validation functions
-function validateEmail(input) {
-    const email = input.value.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!email) {
-        showFieldError(input, 'Email address is required');
-        return false;
-    } else if (!emailRegex.test(email)) {
-        showFieldError(input, 'Please enter a valid email address');
-        return false;
-    } else {
-        clearFieldError(input);
-        return true;
-    }
-}
-
-function validatePassword(input) {
-    const password = input.value;
-
-    if (!password) {
-        showFieldError(input, 'Password is required');
-        return false;
-    } else if (password.length < 6) {
-        showFieldError(input, 'Password must be at least 6 characters');
-        return false;
-    } else {
-        clearFieldError(input);
-        return true;
-    }
-}
-
-function showFieldError(input, message) {
-    clearFieldError(input);
-
-    input.classList.add('is-invalid');
-
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'invalid-feedback';
-    errorDiv.textContent = message;
-
-    input.parentElement.appendChild(errorDiv);
-}
-
-function clearFieldError(input) {
-    input.classList.remove('is-invalid');
-
-    const existingError = input.parentElement.querySelector('.invalid-feedback');
-    if (existingError) {
-        existingError.remove();
-    }
-}
-
 // Keyboard navigation enhancements
 document.addEventListener('keydown', function (e) {
     // Enter key on social buttons
     if (e.key === 'Enter' && e.target.classList.contains('social-btn')) {
         e.target.click();
     }
-
-    // Escape key to clear any error states
-    if (e.key === 'Escape') {
-        const invalidInputs = document.querySelectorAll('.is-invalid');
-        invalidInputs.forEach(input => {
-            clearFieldError(input);
-        });
-    }
 });
-
-// Add CSS for invalid state
-const style = document.createElement('style');
-style.textContent = `
-    .login-input.is-invalid {
-        border-color: #dc3545;
-        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.1);
-    }
-    
-    .invalid-feedback {
-        color: #dc3545;
-        font-size: 0.8rem;
-        margin-top: 0.25rem;
-        display: block;
-    }
-    
-    .focused {
-        transform: scale(1.01);
-        transition: transform 0.2s ease;
-    }
-`;
-document.head.appendChild(style);

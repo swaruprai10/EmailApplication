@@ -1,243 +1,151 @@
-﻿/*body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to right, #ff7e7e, #ff3d3d);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+﻿/* Add the CSS variables at the root level */
+:root {
+    /*login-card*/
+    --brand-charcoal-grey-200: #e3e3e3;
+    --sib-border-radius_lg: var(--brand-rounded-x4, 1rem);
+    --sib-border-radius_md: var(--brand-rounded-x2, 0.5rem);
+    --sib-color_negative-default: var(--brand-tulip-red-600, #ff3a51);
+    --sib-color_surface-hover-background: var(--brand-charcoal-grey-300, #cfcfcf);
+    --sib-color_content-white: var(--brand-white, #fff);
+    --sib-color_content-primary: var(--brand-charcoal-grey-900, #1b1b1b);
+    --sib-cta-default-primary: var(--brand-cta-default-primary, linear-gradient(0deg, #1b1b1b 0%, #2c2c2c 100%));
+    --brand-cta-default-primary: linear-gradient(0deg, #1b1b1b 0%, #2c2c2c 100%);
+    --sib-color_primary-default: var(--brand-charcoal-grey-900, #1b1b1b);
+    /*mb-3*/
+    --sib-typo_font-family--body: "Roboto-Regular", "system-ui", "-apple-system", sans-serif;
+    --sib-typo_font-family--body_bold: "Roboto-Bold", "system-ui", "-apple-system", sans-serif;
+    --sib-typo_font-family--body_medium: "Roboto-Medium", "system-ui", "-apple-system", sans-serif;
+    --sib-typo_text-md-font-size: var(--brand-typo_text-3-font-size, 1rem);
+    --sib-typo_text-line-height: var(--brand-typo_text-3-line-height, 1.5rem);
+    --sib-shadow_light-small: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* * */
+    --sib-color_negative-default: var(--brand-tulip-red-600, #ff3a51);
+    --brand-tulip-red-600: #ff3a51;
+    --brand-rounded-x4: 1rem;
+    --brand-tulip-red-600: #ff3a51;
+    --brand-white: #fff;
+    --brand-charcoal-grey-900: #1b1b1b;
+    /*login title*/
+    --brand-typo_heading-3-font-size: 1.25rem;
+    /*mb-3*/
+    --brand-typo_text-3-font-size: 1rem;
+    --brand-typo_text-3-line-height: 1.5rem;
+    --brand-charcoal-grey-900: #1b1b1b;
+    --brand-charcoal-grey-300: #cfcfcf;
+    --brand-charcoal-grey-900: #1b1b1b;
+    --brand-rounded-x2: 0.5rem;
 }
-
-.auth-container {
-    width: 100%;
-    max-width: 400px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-}
-
-.auth-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.auth-title {
-    font-size: 28px;
-    margin: 10px 0;
-    color: #333;
-}
-
-.auth-subtitle {
-    font-size: 16px;
-    color: #666;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-label {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-.input-icon {
-    margin-right: 8px;
-    color: #ff3d3d;
-}
-
-.form-control {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    transition: border-color 0.3s;
-}
-
-    .form-control:focus {
-        border-color: #ff3d3d;
-        outline: none;
-        box-shadow: 0 0 5px rgba(255, 61, 61, 0.5);
-    }
-
-.btn {
-    width: 100%;
-    padding: 10px;
-    background-color: #ff3d3d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
-
-    .btn:hover {
-        background-color: #e63939;
-    }
-
-.validation-message {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.remember-me {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-    .remember-me input {
-        margin-right: 5px;
-    }
-
-@media (max-width: 600px) {
-    .auth-container {
-        padding: 20px;
-    }
-
-    .auth-title {
-        font-size: 24px;
-    }
-
-    .auth-subtitle {
-        font-size: 14px;
-    }
-}
-*/
-
-/* Hide navbars, footers, sidebars, etc. */
-/*.navbar,
-.sidebar,
-.footer {
-    display: none !important;
-}*/
-
-/* Optional: center the auth form */
-/*.auth-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f3f4f6;*/ /* subtle gray background */
-/*}
-
-.auth-container {
-    max-width: 400px;
-    width: 100%;
-    padding: 2rem;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
-}
-.auth-box {
-    background: white;
-    padding: 2.5rem;
-    border-radius: 1rem;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
-
-.auth-header {
-    text-align: center;
-    margin-bottom: 2rem;
-}
-
-.logo-icon {
-    margin-bottom: 1.5rem;
-}
-
-.auth-title {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 0.5rem;
-}
-
-.auth-subtitle {
-    color: #6b7280;
-    font-size: 0.875rem;
-}
-
-.auth-form {
-    margin-bottom: 1.5rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}*/
-
-
-
-/* Custom CSS for Brevo Login Page */
-
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f5f2f0;
+    background-color: #fef2f2; /* Lighter pink-white */
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .login-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
     position: relative;
 }
 
-.h-100 {
-    height: 100vh;
+.login-content {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .brevo-logo {
-    color: #00A693;
-    margin-bottom: 2rem;
+    /* New specifications */
+    width: 11rem;
+    margin-bottom: 1.5rem;
+    display: inline-flex;
+    flex-direction: column;
+    outline: none;
+    text-decoration: none;
+    /* Your existing styles that we'll keep */
+    text-align: center; /* Maintain center alignment */
 }
 
+    /* Keep your existing logo image/svg styles */
+    .brevo-logo img {
+        width: 100%; /* Now relative to the 11rem container */
+        height: auto;
+        color: #00A693; /* Maintain your brand color */
+        /* Remove fixed width since container now controls size */
+    }
+
 .login-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: none;
-    overflow: hidden;
+    border: 1px solid var(--brand-charcoal-grey-200, #e3e3e3);
+    border-radius: var(--sib-border-radius_lg, 1rem);
+    padding: 1rem;
+    width: 31.25rem; /* 500px */
+    background: var(--sib-color_content-white, #fff);
+    color: var(--sib-color_content-primary, #1f2d3d);
+    max-width: calc(100% + 6px + 5rem);
+    box-shadow: none; /* Remove the existing box-shadow */
 }
 
 .login-title {
-    color: #1f2d3d;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
+    font-size: var(--brand-typo_heading-3-font-size, 1.25rem); /* 20px */
+    text-align: center;
+    /* Remove existing properties that conflict with the new style */
+    color: inherit; /* Will use parent color or the --sib-color_content-primary from earlier */
+    font-weight: normal; /* Reset to default unless you want to keep the 600 weight */
+    margin-bottom: 1rem; /* Adjust as needed */
+    letter-spacing: normal; /* Reset to default */
 }
 
 .form-label {
-    color: #1f2d3d;
-    font-weight: 500;
-    font-size: 0.875rem;
+    color: var(--sib-color_content-primary, #1b1b1b);
+    display: table;
+    font-family: var(--sib-typo_font-family--body_bold, 1rem);
+    font-size: var(--sib-typo_text-md-font-size, 1rem);
+    line-height: var(--sib-typo_text-line-height, 1.5rem);
     margin-bottom: 0.5rem;
+    /* Remove conflicting properties from your original style */
+    font-weight: normal; /* Boldness comes from Roboto-Bold */
 }
 
-.required-asterisk {
-    color: #ff6b6b;
-    margin-left: 2px;
-}
-
-.login-input {
-    border: 1px solid #e1e5e9;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
+.form-control {
+    align-items: center;
+    background: #fff;
+    border-radius: var(--sib-border-radius_md, 0.5rem);
+    display: flex;
+    max-width: 100%;
+    /* Add border and other properties from your original style */
+    border: 1px solid var(--sib-color_surface-hover-background, #cfcfcf);
+    padding: 0.875rem 1rem;
     font-size: 1rem;
     transition: all 0.2s ease;
-    background-color: #fff;
+    height: 48px;
+    line-height: 1.5;
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box; /* Important for proper sizing */
 }
 
-    .login-input:focus {
+    .form-control:focus {
         border-color: #00A693;
         box-shadow: 0 0 0 0.2rem rgba(0, 166, 147, 0.1);
         outline: none;
     }
+
+    .form-control::placeholder {
+        color: #9ca3af;
+        opacity: 1;
+    }
+
+.password-container {
+    position: relative;
+}
 
 .password-toggle {
     position: absolute;
@@ -248,53 +156,84 @@ body {
     background: none;
     color: #6c757d;
     cursor: pointer;
-    padding: 0;
-    width: 20px;
-    height: 20px;
+    padding: 8px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: color 0.2s ease;
+    z-index: 10;
+    border-radius: 4px;
 }
 
     .password-toggle:hover {
         color: #495057;
+        background-color: rgba(0, 0, 0, 0.04);
     }
 
     .password-toggle:focus {
         outline: none;
         color: #00A693;
+        background-color: rgba(0, 166, 147, 0.1);
     }
 
-.login-btn {
-    background-color: #333;
-    border: none;
-    border-radius: 8px;
-    color: white;
+.btn-primary {
+    /* New specifications */
+    align-items: center;
+    background: var(--sib-cta-default-primary, linear-gradient(0deg, #1b1b1b 0%, #2c2c2c 100%));
+    border: 0 solid transparent;
+    border-radius: var(--sib-border-radius_lg, 1rem);
+    box-shadow: var(--sib-shadow_light-small, 0 2px 4px rgba(0, 0, 0, 0.1));
+    color: var(--sib-color_content-white, #fff);
+    display: flex;
+    font-family: var(--sib-typo_font-family--body_medium, "Roboto-Medium", "system-ui", "-apple-system", sans-serif);
+    font-size: var(--sib-typo_text-md-font-size, 1.05rem);
+    justify-content: center;
+    line-height: var(--sib-typo_text-line-height, 1.5rem);
+    max-width: 407.594px;
     padding: 0.875rem 1rem;
-    font-size: 1rem;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    width: 100%;
+    /* Your existing styles with adjustments */
+    height: 52px; /* Taller button */
     font-weight: 500;
     transition: all 0.2s ease;
     letter-spacing: 0.01em;
+    margin-top: 1rem;
 }
 
-    .login-btn:hover {
-        background-color: #222;
+    .btn-primary:hover {
+        background: var(--sib-cta-hover-primary, linear-gradient(0deg, #111 0%, #222 100%));
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .login-btn:focus {
-        background-color: #222;
+    .btn-primary:focus {
+        background: var(--sib-cta-hover-primary, linear-gradient(0deg, #111 0%, #222 100%));
         box-shadow: 0 0 0 0.2rem rgba(51, 51, 51, 0.2);
+        outline: none;
     }
 
-.or-divider {
+    .btn-primary:disabled {
+        box-shadow: none;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+.divider {
     position: relative;
-    margin: 1.5rem 0;
+    margin: 1.75rem 0;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
-    .or-divider::before {
+    .divider::before {
         content: '';
         position: absolute;
         top: 50%;
@@ -304,15 +243,12 @@ body {
         background-color: #e1e5e9;
     }
 
-.or-text {
-    background-color: white;
-    color: #6c757d;
-    padding: 0 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    position: relative;
-    z-index: 1;
-}
+    .divider span {
+        background-color: white;
+        padding: 0 1rem;
+        position: relative;
+        z-index: 1;
+    }
 
 .social-btn {
     border: 1px solid #e1e5e9;
@@ -326,6 +262,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.75rem;
+    height: 48px;
+    margin-bottom: 0.75rem;
 }
 
     .social-btn:hover {
@@ -343,8 +282,8 @@ body {
         color: #333;
     }
 
-    .social-btn svg {
-        flex-shrink: 0;
+    .social-btn:last-child {
+        margin-bottom: 0;
     }
 
 .login-footer {
@@ -352,15 +291,17 @@ body {
     bottom: 2rem;
     left: 0;
     right: 0;
+    text-align: center;
     padding: 0 1rem;
 }
 
 .footer-link {
     color: #6c757d;
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     font-weight: 500;
     transition: color 0.2s ease;
+    margin: 0 1rem;
 }
 
     .footer-link:hover {
@@ -374,64 +315,16 @@ body {
         text-decoration: underline;
     }
 
-/* Responsive adjustments */
-@media (max-width: 576px) {
-    .login-container {
-        padding: 1rem;
-    }
-
-    .login-card {
-        margin-bottom: 4rem;
-    }
-
-    .login-footer {
-        position: relative;
-        margin-top: 2rem;
-        bottom: auto;
-    }
-
-    .footer-link {
-        display: block;
-        margin: 0.5rem 0;
-    }
-
-        .footer-link.me-4 {
-            margin-right: 0 !important;
-        }
+.alert-danger {
+    border-radius: 8px;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
 }
 
-@media (min-width: 577px) and (max-height: 700px) {
-    .login-footer {
-        position: relative;
-        margin-top: 2rem;
-        bottom: auto;
-    }
-}
-
-/* Focus styles for accessibility */
-.login-input:focus,
-.login-btn:focus,
-.social-btn:focus,
-.password-toggle:focus {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-}
-
-/* Animation for smooth interactions */
-.login-card {
-    animation: fadeInUp 0.6s ease-out;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.text-danger.small {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: block;
 }
 
 /* Loading state for buttons */
@@ -459,4 +352,84 @@ body {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .login-container {
+        padding: 1rem;
+        justify-content: flex-start;
+        padding-top: 3rem;
+    }
+
+    .login-card {
+        padding: 2rem 1.5rem;
+        margin-bottom: 4rem;
+    }
+
+    .brevo-logo {
+        margin-bottom: 2rem;
+    }
+
+        .brevo-logo svg {
+            width: 100px;
+        }
+
+    .login-footer {
+        position: relative;
+        margin-top: 2rem;
+        bottom: auto;
+    }
+
+    .footer-link {
+        display: block;
+        margin: 0.5rem 0;
+    }
+}
+
+@media (min-width: 577px) and (max-height: 700px) {
+    .login-container {
+        justify-content: flex-start;
+        padding-top: 2rem;
+    }
+
+    .login-footer {
+        position: relative;
+        margin-top: 2rem;
+        bottom: auto;
+    }
+}
+
+/* Animation for smooth interactions */
+.login-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form field spacing */
+.mb-3 {
+    font-family: var(--sib-typo_font-family--body, "Roboto-Regular", "system-ui", "-apple-system", sans-serif);
+    position: relative;
+    margin-bottom: 1rem !important; /* Keep your existing spacing */
+}
+
+.mb-4 {
+    margin-bottom: 2rem !important; /* Extra space before button */
+}
+
+/* Required asterisk styling */
+.text-danger {
+    color: var(--sib-color_negative-default, #ff3a51) !important;
+    margin-left: 0.25rem;
 }
