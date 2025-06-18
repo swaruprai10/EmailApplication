@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
 using System.Net;
 using System.Net.Mail;
 
@@ -1139,31 +1141,169 @@ namespace EmailCampaignApp.Controllers
             {
                 if (campaign.Attachments != null)
                 {
-                    // Delete attachments from the server
+                    // 1. Delete campaign attachments from the server
                     foreach (var attachment in campaign.Attachments)
                     {
                         var filePath = attachment.FilePath;
                         if (System.IO.File.Exists(filePath))
                         {
                             System.IO.File.Delete(filePath); // Delete the file from the server
+                            _logger.LogInformation($"Deleted attachment file: {filePath}");
                         }
                     }
                 }
 
+                // 2. Delete images referenced in template content
+                if (!string.IsNullOrEmpty(campaign.TemplateContent))
+                {
+                    await DeleteImagesFromTemplateContent(campaign.TemplateContent);
+                }
+
+                // 3. Delete campaign image if it exists
+                if (!string.IsNullOrEmpty(campaign.ImageUrl))
+                {
+                    await DeleteImageFromUrl(campaign.ImageUrl);
+                }
+
+                // 4. Delete all sent emails related to this campaign
+                var sentEmailsDeleteResult = await _context.SentEmails.DeleteManyAsync(e => e.CampaignId == id);
+                _logger.LogInformation($"Deleted {sentEmailsDeleteResult.DeletedCount} sent emails for campaign {id}");
+
+                // 5. Delete all scheduled emails related to this campaign
+                var scheduledEmailsDeleteResult = await _context.ScheduledEmails.DeleteManyAsync(e => e.CampaignName == campaign.Name);
+                _logger.LogInformation($"Deleted {scheduledEmailsDeleteResult.DeletedCount} scheduled emails for campaign {campaign.Name}");
+
                 // Remove the campaign and its attachments from the database
                 await _context.Campaigns.DeleteOneAsync(c => c.Id == campaign.Id);
 
-                TempData["SuccessMessage"] = "Campaign deleted successfully!";
+                TempData["SuccessMessage"] = "Campaign and all related data deleted successfully!";
+                _logger.LogInformation($"Campaign {id} and all related data deleted successfully");
             }
             catch (Exception ex)
             {
-                // Log the exception (optional)
+                _logger.LogError(ex, $"Error occurred while deleting campaign {id}");
                 TempData["ErrorMessage"] = "An error occurred while deleting the campaign.";
             }
 
             return RedirectToAction("Campaigns"); // Redirect back to the campaigns list
         }
+        /// <summary>
+        /// Deletes images referenced in HTML template content
+        /// </summary>
+        /// <param name="htmlContent">HTML content containing image references</param>
+        private async Task DeleteImagesFromTemplateContent(string htmlContent)
+        {
+            try
+            {
+                // Extract image URLs from HTML content using regex
+                var imgRegex = new System.Text.RegularExpressions.Regex(
+                    @"<img[^>]+src=[""']([^""']+)[""'][^>]*>",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
+                var matches = imgRegex.Matches(htmlContent);
+
+                foreach (System.Text.RegularExpressions.Match match in matches)
+                {
+                    var imgUrl = match.Groups[1].Value;
+                    await DeleteImageFromUrl(imgUrl);
+                }
+
+                // Also check for CSS background images
+                var cssRegex = new System.Text.RegularExpressions.Regex(
+                    @"background-image:\s*url\([""']?([^""')]+)[""']?\)",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                var cssMatches = cssRegex.Matches(htmlContent);
+
+                foreach (System.Text.RegularExpressions.Match match in cssMatches)
+                {
+                    var imgUrl = match.Groups[1].Value;
+                    await DeleteImageFromUrl(imgUrl);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting images from template content");
+            }
+        }
+
+        /// <summary>
+        /// Deletes an image file from URL if it's a local upload
+        /// </summary>
+        /// <param name="imageUrl">Image URL to delete</param>
+        private async Task DeleteImageFromUrl(string imageUrl)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(imageUrl))
+                    return;
+
+                // Check if it's a local upload (contains /uploads/)
+                if (imageUrl.Contains("/uploads/"))
+                {
+                    // Extract filename from URL
+                    var uri = new Uri(imageUrl, UriKind.RelativeOrAbsolute);
+                    var fileName = Path.GetFileName(uri.LocalPath);
+
+                    // Construct full file path
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    // Delete the file if it exists
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                        _logger.LogInformation($"Deleted image file: {filePath}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting image from URL: {imageUrl}");
+            }
+        }
+
+        //[HttpPost("/upload")]
+        //public async Task<IActionResult> UploadImage(IFormFile upload)
+        //{
+        //    try
+        //    {
+
+        //        if (upload == null || upload.Length == 0)
+        //            return BadRequest("No file uploaded.");
+
+        //        // Save the file to a folder (e.g., wwwroot/uploads)
+        //        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        //        if (!Directory.Exists(uploadsFolder))
+        //            Directory.CreateDirectory(uploadsFolder);
+
+        //        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(upload.FileName);
+        //        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        //        using (var stream = new FileStream(filePath, FileMode.Create))
+        //        {
+        //            await upload.CopyToAsync(stream);
+        //        }
+
+        //        // Return the URL of the uploaded image
+        //        var fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+        //        //return Json(new { uploaded = true, url = fileUrl });
+
+
+        //        return Json(new
+        //        {
+        //            uploaded = 1,
+        //            fileName = fileName,
+        //            url = fileUrl
+        //        });
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError("Error uploading image" + ex.Message);
+        //        return StatusCode(500, new { uploaded = 0, error = new { message = "Image upload failed." } });
+        //    }
+        //}
 
 
         [HttpPost("/upload")]
@@ -1171,27 +1311,41 @@ namespace EmailCampaignApp.Controllers
         {
             try
             {
-
                 if (upload == null || upload.Length == 0)
                     return BadRequest("No file uploaded.");
 
-                // Save the file to a folder (e.g., wwwroot/uploads)
+                // Validate file type
+                var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/bmp" };
+                if (!allowedTypes.Contains(upload.ContentType.ToLower()))
+                    return BadRequest("Invalid file type. Only image files are allowed.");
+
+                // Create uploads folder
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(upload.FileName);
+                // Generate filename with .webp extension
+                var fileName = Guid.NewGuid().ToString() + ".webp";
                 var filePath = Path.Combine(uploadsFolder, fileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                // Convert image to WebP format
+                using (var inputStream = upload.OpenReadStream())
+                using (var image = await Image.LoadAsync(inputStream))
                 {
-                    await upload.CopyToAsync(stream);
+                    // Configure WebP encoder options
+                    var encoder = new WebpEncoder()
+                    {
+                        Quality = 80, // Adjust quality (0-100)
+                        Method = WebpEncodingMethod.BestQuality,
+                        TransparentColorMode = WebpTransparentColorMode.Preserve
+                    };
+
+                    // Save as WebP
+                    await image.SaveAsync(filePath, encoder);
                 }
 
                 // Return the URL of the uploaded image
                 var fileUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
-                //return Json(new { uploaded = true, url = fileUrl });
-
 
                 return Json(new
                 {
@@ -1199,14 +1353,14 @@ namespace EmailCampaignApp.Controllers
                     fileName = fileName,
                     url = fileUrl
                 });
-
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error uploading image" + ex.Message);
+                _logger.LogError("Error uploading image: " + ex.Message);
                 return StatusCode(500, new { uploaded = 0, error = new { message = "Image upload failed." } });
             }
         }
+
 
         public IActionResult CreateCampaign()
         {
